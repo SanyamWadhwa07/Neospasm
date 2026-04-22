@@ -30,12 +30,29 @@ function NavIcon({ d, polyline }: { d: string; polyline?: boolean }) {
   );
 }
 
-export default function Sidebar({ activeView, onNavChange }: { activeView: NavId; onNavChange: (id: NavId) => void }) {
+export default function Sidebar({
+  activeView,
+  onNavChange,
+  isOpen,
+  onClose,
+}: {
+  activeView: NavId;
+  onNavChange: (id: NavId) => void;
+  isOpen: boolean;
+  onClose: () => void;
+}) {
   const active = activeView;
+
+  function handleNav(id: NavId) {
+    onNavChange(id);
+    onClose();
+  }
 
   return (
     <aside
-      className="fixed left-0 top-0 h-screen w-56 flex flex-col z-40 sidebar-texture"
+      className={`fixed left-0 top-0 h-screen w-56 flex flex-col z-40 sidebar-texture transition-transform duration-300 ease-in-out ${
+        isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+      }`}
       style={{ background: "var(--sidebar-bg)", borderRight: "1px solid var(--sidebar-border)" }}
     >
       {/* Logo */}
@@ -96,7 +113,7 @@ export default function Sidebar({ activeView, onNavChange }: { activeView: NavId
                 return (
                   <button
                     key={item.id}
-                    onClick={() => onNavChange(item.id as NavId)}
+                    onClick={() => handleNav(item.id as NavId)}
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-sm font-medium transition-all relative"
                     style={{
                       background: isActive ? "rgba(255,255,255,0.09)" : "transparent",
