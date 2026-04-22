@@ -37,7 +37,7 @@ export default function SpasmAlert() {
         style={{
           border: "1px solid var(--red-border)",
           boxShadow: "var(--shadow-alert)",
-          background: "linear-gradient(145deg, #FEF1F0 0%, #FFF8F8 100%)",
+          background: "linear-gradient(145deg, #FEF2F2 0%, #FFF8F8 100%)",
         }}
       >
         {/* Animated left border */}
@@ -99,7 +99,7 @@ export default function SpasmAlert() {
           {/* Confidence */}
           <div className="rounded-lg p-3 mb-3 space-y-2.5"
             style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(217,48,37,0.08)" }}>
-            <ConfidenceBar label="EEG" value={89} color="var(--blue)" bg="rgba(25,103,210,0.1)" />
+            <ConfidenceBar label="EEG" value={89} color="var(--blue)" bg="rgba(37,99,235,0.1)" />
             <ConfidenceBar label="Video" value={82} color="var(--teal)" bg="rgba(11,138,116,0.1)" />
             <ConfidenceBar label="Fused" value={94} color="var(--red)" bg="rgba(217,48,37,0.1)" />
           </div>
@@ -113,7 +113,7 @@ export default function SpasmAlert() {
               style={{
                 background: acknowledged
                   ? "linear-gradient(135deg, #059669, #047857)"
-                  : "linear-gradient(135deg, #D93025, #B71C1C)",
+                  : "linear-gradient(135deg, #DC2626, #B71C1C)",
                 boxShadow: acknowledged
                   ? "0 1px 4px rgba(5,150,105,0.4)"
                   : "0 1px 4px rgba(217,48,37,0.4)",

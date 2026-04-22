@@ -95,7 +95,7 @@ export default function TopBar({ activeView, onNavChange }: { activeView: NavId;
 
       {/* Generate report */}
       <button onClick={() => onNavChange("reports")} className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-sm font-semibold text-white transition-all"
-        style={{ background: "linear-gradient(135deg, #1967D2, #1251A3)", boxShadow: "0 1px 4px rgba(25,103,210,0.35)" }}>
+        style={{ background: "linear-gradient(135deg, #2563EB, #1D4ED8)", boxShadow: "0 1px 4px rgba(25,103,210,0.35)" }}>
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
           <polyline points="14 2 14 8 20 8"/>

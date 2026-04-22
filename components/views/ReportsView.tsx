@@ -610,8 +610,8 @@ export default function ReportsView() {
             <button onClick={handleGenerate} disabled={generating || selectedSections.size === 0}
               className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold text-white transition-all"
               style={{
-                background: generating ? "rgba(25,103,210,0.5)" : selectedSections.size === 0 ? "var(--border)" : "linear-gradient(135deg, var(--blue), #1251A3)",
-                boxShadow: generating || selectedSections.size === 0 ? "none" : "0 2px 8px rgba(25,103,210,0.25)",
+                background: generating ? "rgba(37,99,235,0.5)" : selectedSections.size === 0 ? "var(--border)" : "linear-gradient(135deg, var(--blue), #1D4ED8)",
+                boxShadow: generating || selectedSections.size === 0 ? "none" : "0 2px 8px rgba(37,99,235,0.25)",
               }}>
               {generating ? (
                 <>

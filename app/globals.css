@@ -2,35 +2,37 @@
 @import "tailwindcss";
 
 :root {
-  --sidebar-bg: #0C1220;
+  --sidebar-bg: #0F172A;
   --sidebar-border: rgba(255,255,255,0.06);
   --card-bg: #FFFFFF;
-  --page-bg: #F2F4F8;
-  --border: rgba(0,0,0,0.07);
-  --border-strong: rgba(0,0,0,0.12);
+  --page-bg: #F9FAFB;
+  --border: #E5E7EB;
+  --border-strong: #D1D5DB;
 
-  --text-primary: #0D1117;
-  --text-secondary: #5A6480;
-  --text-muted: #9BA3B8;
+  --text-primary: #111827;
+  --text-secondary: #6B7280;
+  --text-muted: #9CA3AF;
 
-  --red: #D93025;
-  --red-light: #FEF1F0;
-  --red-border: rgba(217,48,37,0.2);
+  --red: #DC2626;
+  --red-light: #FEF2F2;
+  --red-border: rgba(220,38,38,0.2);
 
-  --blue: #1967D2;
-  --blue-light: #EEF4FF;
-  --blue-border: rgba(25,103,210,0.2);
+  --blue: #2563EB;
+  --blue-light: #EFF6FF;
+  --blue-border: rgba(37,99,235,0.2);
 
-  --teal: #0B8A74;
-  --teal-light: #EDFBF8;
+  --teal: #0D9488;
+  --teal-light: #F0FDF4;
+  --teal-border: rgba(13,148,136,0.2);
 
-  --amber: #C96A00;
-  --amber-light: #FFF8EC;
+  --amber: #D97706;
+  --amber-light: #FFFBEB;
+  --amber-border: rgba(217,119,6,0.2);
 
   --shadow-xs:  0 1px 2px rgba(0,0,0,0.05);
-  --shadow-sm:  0 1px 4px rgba(0,0,0,0.06), 0 2px 8px rgba(0,0,0,0.04);
-  --shadow-md:  0 4px 12px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.04);
-  --shadow-alert: 0 0 0 1px rgba(217,48,37,0.15), 0 4px 16px rgba(217,48,37,0.12);
+  --shadow-sm:  0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:  0 4px 6px rgba(0,0,0,0.07), 0 10px 15px rgba(0,0,0,0.04);
+  --shadow-alert: 0 0 0 1px rgba(220,38,38,0.15), 0 4px 16px rgba(220,38,38,0.12);
 
   --radius: 12px;
   --radius-sm: 8px;
@@ -60,6 +62,8 @@ body {
   border: 1px solid var(--border);
   box-shadow: var(--shadow-sm);
 }
+
+/* Sidebar active nav item uses a blue accent that matches --blue */
 
 .label {
   font-size: 10px;

@@ -44,7 +44,7 @@ export default function Sidebar({ activeView, onNavChange }: { activeView: NavId
           <div className="relative w-8 h-8 flex-shrink-0">
             <div className="absolute inset-0 rounded-lg bg-blue-600 opacity-20 blur-sm" />
             <div className="relative w-8 h-8 rounded-lg flex items-center justify-center"
-              style={{ background: "linear-gradient(135deg, #1967D2, #1251A3)" }}>
+              style={{ background: "linear-gradient(135deg, #2563EB, #1D4ED8)" }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                 <path d="M3 12 Q5 5 8 12 Q11 19 14 12 Q17 5 21 12"
                   stroke="white" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
@@ -68,7 +68,7 @@ export default function Sidebar({ activeView, onNavChange }: { activeView: NavId
           style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.07)" }}>
           <div className="w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0"
             style={{ background: "rgba(25,103,210,0.3)" }}>
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#6EA8FF" strokeWidth="2.5" strokeLinecap="round">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#93C5FD" strokeWidth="2.5" strokeLinecap="round">
               <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
             </svg>
           </div>
@@ -101,7 +101,7 @@ export default function Sidebar({ activeView, onNavChange }: { activeView: NavId
                     style={{
                       background: isActive ? "rgba(255,255,255,0.09)" : "transparent",
                       color: isActive ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.45)",
-                      borderLeft: isActive ? "2px solid #6EA8FF" : "2px solid transparent",
+                      borderLeft: isActive ? "2px solid #93C5FD" : "2px solid transparent",
                     }}
                   >
                     <NavIcon d={item.icon} polyline={item.polyline} />
@@ -142,7 +142,7 @@ export default function Sidebar({ activeView, onNavChange }: { activeView: NavId
         {/* User */}
         <div className="flex items-center gap-3 px-3 pt-3 mt-1" style={{ borderTop: "1px solid var(--sidebar-border)" }}>
           <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold text-white"
-            style={{ background: "linear-gradient(135deg, #1967D2, #1251A3)" }}>
+            style={{ background: "linear-gradient(135deg, #2563EB, #1D4ED8)" }}>
             KA
           </div>
           <div className="flex-1 min-w-0">

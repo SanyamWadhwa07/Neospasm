@@ -31,7 +31,7 @@ export default function AlertConfigView() {
         </div>
         <button onClick={handleSave}
           className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white transition-all"
-          style={{ background: saved ? "var(--teal)" : "linear-gradient(135deg, var(--blue), #1251A3)", boxShadow: "0 2px 8px rgba(25,103,210,0.25)" }}>
+          style={{ background: saved ? "var(--teal)" : "linear-gradient(135deg, var(--blue), #1D4ED8)", boxShadow: "0 2px 8px rgba(37,99,235,0.25)" }}>
           {saved ? (
             <><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M20 6L9 17l-5-5"/></svg> Saved</>
           ) : "Save Changes"}

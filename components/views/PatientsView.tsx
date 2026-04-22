@@ -44,7 +44,7 @@ export default function PatientsView() {
           <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>4 patients · PICU · Updated 14:21</p>
         </div>
         <button className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white transition-all"
-          style={{ background: "linear-gradient(135deg, var(--blue), #1251A3)", boxShadow: "0 2px 8px rgba(25,103,210,0.3)" }}>
+          style={{ background: "linear-gradient(135deg, var(--blue), #1D4ED8)", boxShadow: "0 2px 8px rgba(37,99,235,0.3)" }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
             <path d="M12 5v14M5 12h14"/>
           </svg>
@@ -103,7 +103,7 @@ export default function PatientsView() {
                   <td className="px-5 py-3.5">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
-                        style={{ background: "linear-gradient(135deg, var(--blue), #1251A3)" }}>
+                        style={{ background: "linear-gradient(135deg, var(--blue), #1D4ED8)" }}>
                         {p.name.split(" ")[1][0]}{p.sex}
                       </div>
                       <div>

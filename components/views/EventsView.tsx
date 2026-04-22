@@ -56,7 +56,7 @@ export default function EventsView() {
           <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>Baby R. · MRN 00482-A · Last 48 hours</p>
         </div>
         <button className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white"
-          style={{ background: "linear-gradient(135deg, var(--blue), #1251A3)" }}>
+          style={{ background: "linear-gradient(135deg, var(--blue), #1D4ED8)" }}>
           Export CSV
         </button>
       </div>

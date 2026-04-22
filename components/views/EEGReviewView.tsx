@@ -45,7 +45,7 @@ export default function EEGReviewView() {
             Freeze
           </button>
           <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold text-white transition-all"
-            style={{ background: "linear-gradient(135deg, var(--blue), #1251A3)" }}>
+            style={{ background: "linear-gradient(135deg, var(--blue), #1D4ED8)" }}>
             Export EDF
           </button>
         </div>
