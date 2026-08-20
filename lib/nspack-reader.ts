@@ -23,20 +23,31 @@ import os from "os";
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
+// Dataset bundled in the repo — used whenever NSPACK_PATH isn't set (e.g. in
+// production/Vercel, which has no access to a developer's local .env.local).
+const BUNDLED_DATASET_DIR = path.join(/*turbopackIgnore: true*/ process.cwd(), "non video data");
+
 function getNspackPath(): string {
   const p = process.env.NSPACK_PATH;
-  if (!p) {
-    throw new Error(
-      "NSPACK_PATH environment variable is not set.\n" +
-      "Add it to your .env.local file, pointing at either a .nspack file or an extracted folder:\n" +
-      "  NSPACK_PATH=C:\\neospasm-data\\patient.nspack\n" +
-      "  NSPACK_PATH=C:\\neospasm-data\\extracted_nspack"
-    );
+  if (p) {
+    if (!fs.existsSync(p)) {
+      throw new Error(`NSPACK_PATH points to a path that does not exist: ${p}`);
+    }
+    return p;
   }
-  if (!fs.existsSync(p)) {
-    throw new Error(`NSPACK_PATH points to a path that does not exist: ${p}`);
+
+  if (fs.existsSync(BUNDLED_DATASET_DIR)) {
+    return BUNDLED_DATASET_DIR;
   }
-  return p;
+
+  throw new Error(
+    "NSPACK_PATH environment variable is not set and no bundled dataset was found at " +
+    `"${BUNDLED_DATASET_DIR}".\n` +
+    "Either restore the bundled dataset folder, or set NSPACK_PATH in .env.local, pointing at " +
+    "either a .nspack file or an extracted folder:\n" +
+    "  NSPACK_PATH=C:\\neospasm-data\\patient.nspack\n" +
+    "  NSPACK_PATH=C:\\neospasm-data\\extracted_nspack"
+  );
 }
 
 function nspackIsDirectory(): boolean {
