@@ -165,7 +165,7 @@ export default function LiveMonitoring() {
       {/* Fusion bar */}
       <div className="px-4 pt-2 pb-4">
         <div className="flex items-center justify-between mb-1.5">
-          <span className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>Fusion confidence</span>
+          <span className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>{/* Fusion confidence */ "EEG confidence"}</span>
           <span className="text-sm font-mono font-semibold" style={{ color: "var(--red)" }}>94.0%</span>
         </div>
         <div className="relative h-2 rounded-full overflow-visible" style={{ background: "var(--page-bg)", border: "1px solid var(--border)" }}>

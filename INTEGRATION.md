@@ -7,7 +7,12 @@
 The app now reads DIRECTLY from your Neurosoft .nspack file on disk.
 Patient name, exam date, recording duration, doctor name, video/audio presence,
 and EEG channel count all come LIVE from Neurosoft.DB inside the file.
-Spasm timestamps come from your spasms_time_stamp.xlsx annotations.
+
+> **Correction (see README.md "Current status"):** there is no
+> `spasms_time_stamp.xlsx` file anywhere in this repo. Spasm event
+> timestamps and their type/laterality/confidence classification are
+> hand-typed literals in `lib/spasm-data.ts` (`RAW`/`UI_META`), not parsed
+> from Excel. Only the patient/exam metadata listed above is genuinely live.
 
 ---
 

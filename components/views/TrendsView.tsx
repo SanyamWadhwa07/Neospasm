@@ -2,16 +2,11 @@
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid, ReferenceLine } from "recharts";
 import { useSpasmData } from "@/lib/use-spasm-data";
 
-// 7-day trend — only Day 7 (today) is real; earlier days are historical context
+// Day 1-6 removed: only one real recording session exists in spasm-data.ts,
+// so there is no real admission history to show alongside it.
+// const buildDailyData = (todayEvents, todayIess) => [ /* Day 1-6 mock, removed */ ];
 const buildDailyData = (todayEvents: number, todayIess: number) => [
-  { day: "Day 1", events: 4,           iess: 3.2, focal: 3,  diffuse: 1 },
-  { day: "Day 2", events: 7,           iess: 4.1, focal: 5,  diffuse: 2 },
-  { day: "Day 3", events: 12,          iess: 5.0, focal: 8,  diffuse: 4 },
-  { day: "Day 4", events: 9,           iess: 4.6, focal: 6,  diffuse: 3 },
-  { day: "Day 5", events: 15,          iess: 5.8, focal: 11, diffuse: 4 },
-  { day: "Day 6", events: 18,          iess: 6.4, focal: 14, diffuse: 4 },
-  { day: "Day 7 ★", events: todayEvents, iess: todayIess,
-    focal: Math.round(todayEvents * 0.7), diffuse: Math.round(todayEvents * 0.05) },
+  { day: "Today", events: todayEvents, iess: todayIess },
 ];
 
 // Hourly distribution built from real spasm events
@@ -61,12 +56,9 @@ export default function TrendsView() {
   const spasmsPerMin = summary?.spasmsPerMinute ?? 1.65;
 
   const dailyData  = buildDailyData(todayEvents, todayIess);
-  const hourlyData = events.length > 0 ? buildHourlyData(events) : [
-    { hour: "00", events: 2 }, { hour: "02", events: 4 }, { hour: "04", events: 6 },
-    { hour: "06", events: 23 }, { hour: "08", events: 0 }, { hour: "10", events: 0 },
-    { hour: "12", events: 0 }, { hour: "14", events: 0 }, { hour: "16", events: 0 },
-    { hour: "18", events: 0 }, { hour: "20", events: 0 }, { hour: "22", events: 0 },
-  ];
+  // Fabricated placeholder counts removed — an empty/loading state has no real hourly
+  // distribution yet, so every bucket is genuinely 0 until real events arrive.
+  const hourlyData = buildHourlyData(events);
 
   // Peak hour from real data
   const peakHour = hourlyData.reduce((a, b) => a.events > b.events ? a : b, { hour: "06", events: 0 });
@@ -76,7 +68,7 @@ export default function TrendsView() {
       <div>
         <h1 className="text-xl font-semibold" style={{ color: "var(--text-primary)", letterSpacing: "-0.02em" }}>Trends</h1>
         <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>
-          {patientName} · MRN {patientId} · Day 1–7 of admission
+          {patientName} · MRN {patientId} · single recording session
         </p>
       </div>
 
@@ -106,7 +98,7 @@ export default function TrendsView() {
                 <span className="metric text-2xl" style={{ color: "var(--red)" }}>
                   {loading ? "…" : todayIess}
                 </span>
-                <span className="text-xs" style={{ color: "var(--text-muted)" }}>current · Day 7</span>
+                <span className="text-xs" style={{ color: "var(--text-muted)" }}>current</span>
               </div>
             </div>
             <span className="text-xs font-semibold px-2.5 py-1 rounded-lg"
@@ -128,7 +120,7 @@ export default function TrendsView() {
             </ResponsiveContainer>
           </div>
           <p className="text-xs mt-2" style={{ color: "var(--text-muted)" }}>
-            ★ Day 7 shows real data from today's recording ({todayEvents} events · {burden}% burden)
+            Real data from today's recording ({todayEvents} events · {burden}% burden)
           </p>
         </div>
 
@@ -155,7 +147,7 @@ export default function TrendsView() {
       <div className="card p-5 min-w-0">
         <div className="flex items-center justify-between mb-4">
           <div className="label">Daily Spasm Breakdown</div>
-          <span className="text-xs" style={{ color: "var(--text-muted)" }}>★ Day 7 = real data</span>
+          <span className="text-xs" style={{ color: "var(--text-muted)" }}>real data</span>
         </div>
         <div className="h-48 min-w-0">
           <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
@@ -163,18 +155,9 @@ export default function TrendsView() {
               <XAxis dataKey="day" tick={{ fontSize: 10, fill: "var(--text-muted)", fontFamily: "var(--font-mono)" }} axisLine={false} tickLine={false} />
               <YAxis hide />
               <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="focal"   name="focal"   fill="var(--blue)" radius={[3, 3, 0, 0]} stackId="a" />
-              <Bar dataKey="diffuse" name="diffuse" fill="var(--teal)" radius={[3, 3, 0, 0]} stackId="a" />
+              <Bar dataKey="events" name="events" fill="var(--blue)" radius={[3, 3, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
-        </div>
-        <div className="flex items-center gap-4 mt-3 pt-3" style={{ borderTop: "1px solid var(--border)" }}>
-          <span className="flex items-center gap-1.5 text-xs" style={{ color: "var(--text-secondary)" }}>
-            <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: "var(--blue)" }}/> {/* Focal */ "-"}
-          </span>
-          <span className="flex items-center gap-1.5 text-xs" style={{ color: "var(--text-secondary)" }}>
-            <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: "var(--teal)" }}/> {/* Diffuse */ "-"}
-          </span>
         </div>
       </div>
     </div>

@@ -118,7 +118,7 @@ export default function EventsList() {
                   {ev.fusionConfidencePct}
                   <span className="text-xs font-normal" style={{ color: "var(--text-muted)" }}>%</span>
                 </div>
-                <div className="text-[10px] font-semibold" style={{ color: "var(--text-muted)", letterSpacing: "0.05em" }}>FUSED</div>
+                <div className="text-[10px] font-semibold" style={{ color: "var(--text-muted)", letterSpacing: "0.05em" }}>{/* FUSED */ "EEG"}</div>
               </div>
 
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--border-strong)" strokeWidth="2.5" strokeLinecap="round"

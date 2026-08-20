@@ -100,8 +100,9 @@ export default function SpasmAlert() {
           <div className="rounded-lg p-3 mb-3 space-y-2.5"
             style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(217,48,37,0.08)" }}>
             <ConfidenceBar label="EEG" value={89} color="var(--blue)" bg="rgba(37,99,235,0.1)" />
-            <ConfidenceBar label="Video" value={82} color="var(--teal)" bg="rgba(11,138,116,0.1)" />
-            <ConfidenceBar label="Fused" value={94} color="var(--red)" bg="rgba(217,48,37,0.1)" />
+            {/* No real video pipeline or fusion score yet — only EEG data exists right now */}
+            {/* <ConfidenceBar label="Video" value={82} color="var(--teal)" bg="rgba(11,138,116,0.1)" /> */}
+            {/* <ConfidenceBar label="Fused" value={94} color="var(--red)" bg="rgba(217,48,37,0.1)" /> */}
           </div>
 
           {/* Actions */}

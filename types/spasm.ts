@@ -25,7 +25,7 @@ export interface SpasmEvent {
   // UI classification fields
   type: SpasmType;
   laterality: Laterality;
-  fusionConfidencePct: number;   // e.g. 94  → shown as "94% FUSED"
+  fusionConfidencePct: number;   // e.g. 94  → shown as "94% EEG" (no real fusion source yet)
   description: string;           // e.g. "Right-arm flexion, cluster tail"
   isClusterTail: boolean;
 }

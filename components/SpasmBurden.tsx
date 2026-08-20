@@ -1,25 +1,11 @@
 "use client";
-import { useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { useSpasmData } from "@/lib/use-spasm-data";
 
-// Keep 7D and 30D as mock (only have one recording session)
-// 24H is replaced with real data from the .nspack
-const data7d = [
-  { time: "Mon", focal: 8,  diffuse: 3 },
-  { time: "Tue", focal: 12, diffuse: 2 },
-  { time: "Wed", focal: 6,  diffuse: 4 },
-  { time: "Thu", focal: 15, diffuse: 1 },
-  { time: "Fri", focal: 10, diffuse: 5 },
-  { time: "Sat", focal: 21, diffuse: 2 },
-  { time: "Sun", focal: 9,  diffuse: 3 },
-];
-const data30d = [
-  { time: "W1", focal: 45, diffuse: 12 },
-  { time: "W2", focal: 38, diffuse: 8  },
-  { time: "W3", focal: 62, diffuse: 15 },
-  { time: "W4", focal: 78, diffuse: 20 },
-];
+// 7D/30D tabs removed: only one real recording session exists in spasm-data.ts,
+// so there is no real week/month history to show.
+// const data7d = [ /* mock, removed */ ];
+// const data30d = [ /* mock, removed */ ];
 
 const CustomTooltip = ({ active, payload, label }: {
   active?: boolean;
@@ -44,7 +30,6 @@ const CustomTooltip = ({ active, payload, label }: {
 };
 
 export default function SpasmBurden() {
-  const [tab, setTab] = useState("24H");
   const { timeline, summary, loading } = useSpasmData();
 
   // Convert real timeline buckets into chart format for 24H tab
@@ -54,12 +39,6 @@ export default function SpasmBurden() {
     focal:   b.count,   // all spasms in this bucket
     diffuse: 0,         // diffuse breakdown not in timeline; shown as 0
   }));
-
-  const dataMap: Record<string, typeof data24h> = {
-    "24H": data24h,
-    "7D":  data7d,
-    "30D": data30d,
-  };
 
   const totalLabel = summary
     ? `${summary.totalSpasms} events · peak ${summary.exam.date ? new Date(summary.exam.date).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }) : "—"}`
@@ -75,34 +54,18 @@ export default function SpasmBurden() {
               {loading ? "…" : summary?.totalSpasms ?? 21}
             </span>
             <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-              {tab === "24H"
-                ? `events · burden ${summary?.spasmBurdenPercent ?? 0}%`
-                : tab === "7D" ? "events · 7-day view" : "events · 30-day view"
-              }
+              events · burden {summary?.spasmBurdenPercent ?? 0}%
             </span>
           </div>
         </div>
-
-        <div className="flex rounded-lg overflow-hidden p-0.5"
-          style={{ background: "var(--page-bg)", border: "1px solid var(--border)" }}>
-          {["24H", "7D", "30D"].map((t) => (
-            <button key={t} onClick={() => setTab(t)}
-              className="text-xs font-semibold px-3 py-1.5 rounded-md transition-all"
-              style={tab === t
-                ? { background: "white", color: "var(--blue)", boxShadow: "var(--shadow-xs)", border: "1px solid var(--border)" }
-                : { background: "transparent", color: "var(--text-muted)", border: "1px solid transparent" }
-              }>
-              {t}
-            </button>
-          ))}
-        </div>
+        {/* 7D/30D tab switcher removed — no real history to switch to */}
       </div>
 
       <div className="h-32">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
-            data={dataMap[tab]}
-            barSize={tab === "24H" ? 9 : tab === "7D" ? 13 : 26}
+            data={data24h}
+            barSize={9}
             barGap={2}
             barCategoryGap="30%"
           >

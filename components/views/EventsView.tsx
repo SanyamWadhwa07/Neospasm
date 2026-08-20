@@ -149,7 +149,7 @@ export default function EventsView() {
           <div className="col-span-4">Description</div>
           <div className="col-span-2">Duration</div>
           <div className="col-span-2 text-right">IESS</div>
-          <div className="col-span-1 text-right">Fused</div>
+          <div className="col-span-1 text-right">{/* Fused */ "EEG"}</div>
         </div>
 
         {/* Rows */}
@@ -223,7 +223,7 @@ export default function EventsView() {
                   <div className="text-sm font-mono font-semibold" style={{ color }}>
                     {ev.fusionConfidencePct}%
                   </div>
-                  <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>FUSED</div>
+                  <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>{/* FUSED */ "EEG"}</div>
                 </div>
 
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--border-strong)" strokeWidth="2.5" strokeLinecap="round"
