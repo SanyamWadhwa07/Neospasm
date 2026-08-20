@@ -1,41 +1,7 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import EEGWaveform from "./EEGWaveform";
-
-function SkeletonFigure() {
-  return (
-    <svg viewBox="0 0 200 230" fill="none" className="w-full h-full">
-      <defs>
-        <radialGradient id="glow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#DC2626" stopOpacity="0.3"/>
-          <stop offset="100%" stopColor="#DC2626" stopOpacity="0"/>
-        </radialGradient>
-      </defs>
-      <ellipse cx="100" cy="175" rx="55" ry="18" fill="url(#glow)" />
-      {/* Head */}
-      <circle cx="100" cy="52" r="24" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.12)" strokeWidth="1"/>
-      {/* Spine */}
-      <line x1="100" y1="76" x2="100" y2="150" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" strokeLinecap="round"/>
-      {/* Shoulders */}
-      <line x1="100" y1="96" x2="55" y2="128" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" strokeLinecap="round"/>
-      <line x1="100" y1="96" x2="148" y2="118" stroke="#DC2626" strokeWidth="1.5" strokeLinecap="round"/>
-      {/* Hips */}
-      <line x1="100" y1="150" x2="76" y2="192" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" strokeLinecap="round"/>
-      <line x1="100" y1="150" x2="124" y2="192" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" strokeLinecap="round"/>
-      {/* Joints */}
-      {[
-        [100, 52], [100, 96], [55, 128], [148, 118], [100, 150], [76, 192], [124, 192]
-      ].map(([cx, cy], i) => (
-        <g key={i}>
-          <circle cx={cx} cy={cy} r={5} fill={i === 3 ? "rgba(220,38,38,0.3)" : "rgba(255,255,255,0.08)"}
-            stroke={i === 3 ? "#DC2626" : "rgba(255,255,255,0.2)"} strokeWidth="1"/>
-          <circle cx={cx} cy={cy} r={2.5} fill={i === 3 ? "#DC2626" : "rgba(255,255,255,0.5)"}/>
-        </g>
-      ))}
-    </svg>
-  );
-}
 
 function MetricTile({ label, value, unit, accent }: { label: string; value: string; unit: string; accent?: string }) {
   return (
@@ -52,6 +18,14 @@ function MetricTile({ label, value, unit, accent }: { label: string; value: stri
 
 export default function LiveMonitoring() {
   const [paused, setPaused] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!el) return;
+    if (paused) el.pause();
+    else el.play().catch(() => {});
+  }, [paused]);
 
   return (
     <div className="card overflow-hidden">
@@ -89,6 +63,17 @@ export default function LiveMonitoring() {
 
       {/* Camera feed */}
       <div className="relative" style={{ background: "#060D1A", aspectRatio: "16/9" }}>
+        {/* Video */}
+        <video
+          ref={videoRef}
+          className="absolute inset-0 w-full h-full object-contain"
+          src="/video.mp4"
+          autoPlay
+          loop
+          muted
+          playsInline
+        />
+
         {/* Grid lines */}
         <svg className="absolute inset-0 w-full h-full opacity-10" preserveAspectRatio="none">
           {Array.from({ length: 8 }, (_, i) => (
@@ -98,13 +83,6 @@ export default function LiveMonitoring() {
             <line key={`h${i}`} x1="0" y1={`${(i + 1) * 16.6}%`} x2="100%" y2={`${(i + 1) * 16.6}%`} stroke="white" strokeWidth="0.5"/>
           ))}
         </svg>
-
-        {/* Skeleton */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-36 h-48">
-            <SkeletonFigure />
-          </div>
-        </div>
 
         {/* Corner brackets */}
         {[
@@ -127,7 +105,7 @@ export default function LiveMonitoring() {
         </div>
 
         <div className="absolute bottom-2.5 right-3 text-[10px] font-mono text-white/40">
-          14:23:47 · 30FPS · 1080p
+          0:15 loop · 25FPS · 346×540
         </div>
 
         {/* Fullscreen */}
@@ -143,7 +121,7 @@ export default function LiveMonitoring() {
       <div className="flex gap-2 p-3" style={{ background: "#080F1C" }}>
         <MetricTile label="Motion Energy" value="0.82" unit="rel" accent="#FF7070" />
         <MetricTile label={/* "Pose Asymmetry" */ "-"} value={/* "0.61" */ "-"} unit={/* "idx" */ "-"} accent="#FACC15" />
-        <MetricTile label="Frame Rate" value="30" unit="Hz" />
+        <MetricTile label="Frame Rate" value="25" unit="Hz" />
       </div>
 
       {/* EEG */}
