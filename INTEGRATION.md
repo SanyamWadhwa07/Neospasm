@@ -19,6 +19,19 @@ and EEG channel count all come LIVE from Neurosoft.DB inside the file.
 > located. If you integrate a `.nspack` from a site outside India, update
 > the `timeZone` in `lib/spasm-data.ts`'s `toWallClock()` and in
 > `SpasmBurden.tsx` accordingly.
+>
+> **EEG waveform channel names:** `EEGWaveform.tsx` now plays back real
+> decoded samples from `.nscurve` (via `/api/eeg` and
+> `lib/nspack-reader.ts`'s `listEegCurves()`/`readEegCurveWindow()`), not a
+> synthetic signal. However, the curve-index → electrode-name mapping is
+> **not** derivable from `Neurosoft.DB` — it's inside `.NET
+> BinaryFormatter`-serialized sidecar files (e.g.
+> `*_NeuroSoft.EEGPlugIn.EEGCheckupSettings.74`) that aren't parsed. Channel
+> labels shown in the UI (`Fp1`, `Fp2`, ... or `Ch1`, `Ch2`, ...) are
+> assigned to curve files purely by position/index order, with no verified
+> correspondence to the real electrode. If you need clinically-labeled
+> channels, you'll need to parse that sidecar file (MS-NRBF format) to
+> recover the real curve → electrode mapping first.
 
 ---
 
@@ -138,7 +151,9 @@ pm2 startup
 .nspack file (disk)
   └─ adm-zip unzips it
        ├─ Neurosoft.DB  ──→  better-sqlite3  ──→  patient, exam, doctor, channels
-       └─ NSData/*.nscurve   (raw EEG — not parsed, requires Neurosoft decoder)
+       └─ NSData/*.nscurve   (raw float32 EEG samples — decoded directly,
+                              see lib/nspack-reader.ts; channel *names* still
+                              unresolved, see "EEG waveform channel names" above)
 
 spasms_time_stamp.xlsx (hardcoded in spasm-data.ts)
   └─ timestamp parser  ──→  23 spasm events with start/end/duration

@@ -25,6 +25,11 @@ still referring to one.
 ### What's real (read live from `Neurosoft.DB` via `lib/nspack-reader.ts`)
 - Patient name/weight, exam date, doctor name
 - Video/audio presence flags, EEG channel count
+- EEG waveform traces in `EEGWaveform.tsx` — decoded directly from the raw
+  `.nscurve` files (`lib/nspack-reader.ts`'s `listEegCurves()` /
+  `readEegCurveWindow()`, served via `/api/eeg`) instead of a synthetic
+  signal. **Channel labels are not verified against this real data** — see
+  "Known inaccuracies" below.
 
 ### Timezone
 All displayed spasm event/exam clock times are shown in **IST (India Standard
@@ -42,8 +47,6 @@ the server's or browser's local timezone. This matches the recording site.
   the hardcoded event data above, and its `delta24h` is a fixed `+0.8`
 
 ### What's pure UI mock (bypasses `lib/spasm-data.ts` entirely)
-- `EEGWaveform.tsx` — synthetic sine/random signal, not the real `.nscurve`
-  files
 - `LiveMonitoring.tsx` — simulated live camera/pose panel (fixed FPS,
   timestamp, motion metrics); not wired to any real feed
 - `ReportsView.tsx` PDF export — narrative text templated around real event
@@ -70,6 +73,18 @@ the server's or browser's local timezone. This matches the recording site.
 - `INTEGRATION.md` and a comment in `lib/spasm-data.ts` (`RAW`) reference a
   `spasms_time_stamp.xlsx` file that does not exist in the repo — the event
   timestamps are hand-typed, not parsed from Excel.
+- **EEG channel labels don't correspond to the real electrode.** `/api/eeg`
+  (`lib/nspack-reader.ts`) decodes real waveform samples from `.nscurve`
+  files, but the true curve-index → electrode-name mapping (e.g. "curve 16 =
+  Fp1") isn't derivable from `Neurosoft.DB` — it lives inside `.NET
+  BinaryFormatter`-serialized sidecar files
+  (`*_NeuroSoft.EEGPlugIn.EEGCheckupSettings.74`) next to the curve files,
+  which aren't parsed. `/api/eeg` labels channels generically (`Ch1`, `Ch2`,
+  ... in curve-index order); `EEGReviewView.tsx`'s `FALLBACK_CHANNELS`
+  10-20 names (`Fp1`, `Fp2`, ...) are assigned to those channels purely
+  positionally, with no verified correspondence to which electrode actually
+  recorded that trace. The waveform data itself is real; the name next to
+  it is a guess.
 - `AlertConfigView.tsx` still has "Cluster Alert Count"/"cluster event"
   config copy (a feature name — different meaning from the spasm-
   classification "cluster" wording elsewhere, so left as-is).

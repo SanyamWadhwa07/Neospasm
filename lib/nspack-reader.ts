@@ -228,6 +228,74 @@ export function getEegChannelCount(): number {
   return entries.filter((e) => e.entryName.endsWith(".nscurve")).length;
 }
 
+// ─── EEG curve (.nscurve) reading ─────────────────────────────────────────────
+// .nscurve files are raw, headerless, little-endian float32 sample arrays,
+// already in volts — one file per channel. Verified empirically against this
+// repo's bundled dataset: byte length is always an exact multiple of 4 (no
+// header/footer), and sampleCount / Exams.ExamDuration == 200 Hz exactly, so
+// that's treated as the fixed EEG sampling rate. Curve-index → electrode-name
+// mapping is NOT available here (it lives in .NET BinaryFormatter-serialized
+// sidecar files, not Neurosoft.DB), so callers get channels labeled by their
+// raw curve index rather than a clinical montage name.
+
+export const EEG_SAMPLE_RATE_HZ = 200;
+
+export interface CurveFileInfo {
+  index: number;
+  filePath: string;
+  byteLength: number;
+  sampleCount: number;
+}
+
+function findCurveFilesInDirectory(dir: string): CurveFileInfo[] {
+  const out: CurveFileInfo[] = [];
+  const walk = (d: string) => {
+    for (const entry of fs.readdirSync(d, { withFileTypes: true })) {
+      const full = path.join(d, entry.name);
+      if (entry.isDirectory()) { walk(full); continue; }
+      const m = entry.name.match(/NeuroSoft\.Curves\.Curve\.(\d+)\.nscurve$/);
+      if (!m) continue;
+      const byteLength = fs.statSync(full).size;
+      if (byteLength === 0 || byteLength % 4 !== 0) continue; // unused channel slot / not a clean float32 array
+      out.push({ index: Number(m[1]), filePath: full, byteLength, sampleCount: byteLength / 4 });
+    }
+  };
+  walk(dir);
+  out.sort((a, b) => a.index - b.index);
+  return out;
+}
+
+let _cachedCurveDir: string | null = null;
+let _cachedCurves: CurveFileInfo[] | null = null;
+
+export function listEegCurves(): CurveFileInfo[] {
+  const nspackPath = getNspackPath();
+  if (!nspackIsDirectory()) {
+    throw new Error("EEG curve reading currently only supports an already-extracted NSPACK_PATH folder, not a raw .nspack zip.");
+  }
+  if (_cachedCurves && _cachedCurveDir === nspackPath) return _cachedCurves;
+  _cachedCurves = findCurveFilesInDirectory(nspackPath);
+  _cachedCurveDir = nspackPath;
+  return _cachedCurves;
+}
+
+/** Read a window of real decoded samples (volts) from one curve file, clamped to its actual length. */
+export function readEegCurveWindow(curve: CurveFileInfo, startSec: number, durationSec: number): Float32Array {
+  const totalSamples = curve.sampleCount;
+  const startSample = Math.max(0, Math.min(totalSamples, Math.floor(startSec * EEG_SAMPLE_RATE_HZ)));
+  const count = Math.max(0, Math.min(totalSamples - startSample, Math.round(durationSec * EEG_SAMPLE_RATE_HZ)));
+  if (count === 0) return new Float32Array(0);
+
+  const fd = fs.openSync(curve.filePath, "r");
+  try {
+    const buf = Buffer.alloc(count * 4);
+    fs.readSync(fd, buf, 0, buf.length, startSample * 4);
+    return new Float32Array(buf.buffer, buf.byteOffset, count);
+  } finally {
+    fs.closeSync(fd);
+  }
+}
+
 // ─── Cleanup on process exit ──────────────────────────────────────────────────
 
 process.on("exit", () => {
