@@ -364,7 +364,7 @@ export default function EEGReviewView() {
                     <div className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0"
                       style={{ background: a.type === "alert" ? "var(--red)" : a.type === "warning" ? "var(--amber)" : "var(--teal)" }}/>
                     <div className="flex-1 min-w-0">
-                      <div className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>{a.label}</div>
+                      <div className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>{/* {a.label} */ "-"}</div>
                       <div className="flex items-center gap-1.5 mt-0.5">
                         <span className="text-[10px] font-mono" style={{ color: "var(--text-muted)" }}>{a.time}</span>
                         <span className="text-[10px] font-mono px-1 rounded"

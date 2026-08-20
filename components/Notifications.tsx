@@ -6,7 +6,7 @@ const items = [
     iconBg: "var(--blue-light)",
     iconColor: "var(--blue)",
     title: "Clinician paged",
-    desc: "Dr. Arora notified — cluster alert 14:09",
+    desc: "-", // "Dr. Arora notified — cluster alert 14:09"
     time: "14:10",
     urgent: false,
   },
@@ -15,7 +15,7 @@ const items = [
     iconBg: "var(--red-light)",
     iconColor: "var(--red)",
     title: "IESS score updated",
-    desc: "6.8 → 7.2 following afternoon cluster",
+    desc: "-", // "6.8 → 7.2 following afternoon cluster"
     time: "14:20",
     urgent: true,
   },

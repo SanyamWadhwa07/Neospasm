@@ -98,17 +98,17 @@ export default function EventsList() {
                   </span>
                   <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded-md"
                     style={{ background: bgColor, color, border: `1px solid ${borderColor}` }}>
-                    {ev.type}
+                    {/* {ev.type} */ "-"}
                   </span>
                   {side !== "—" && (
                     <span className="text-xs font-mono font-semibold px-1.5 py-0.5 rounded"
                       style={{ background: "var(--page-bg)", color: "var(--text-muted)", border: "1px solid var(--border)" }}>
-                      {side}
+                      {/* {side} */ "-"}
                     </span>
                   )}
                 </div>
                 <div className="text-xs mt-0.5 truncate" style={{ color: "var(--text-muted)" }}>
-                  {ev.durationSec}s · {ev.description}
+                  {ev.durationSec}s · {/* {ev.description} */ "-"}
                 </div>
               </div>
 

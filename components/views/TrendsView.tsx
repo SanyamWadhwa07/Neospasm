@@ -41,7 +41,9 @@ const CustomTooltip = ({ active, payload, label }: {
       {payload.map(p => (
         <div key={p.name} className="text-xs flex items-center gap-2">
           <span className="font-semibold" style={{ color: "var(--text-primary)" }}>{p.value}</span>
-          <span style={{ color: "var(--text-muted)", textTransform: "capitalize" }}>{p.name}</span>
+          <span style={{ color: "var(--text-muted)", textTransform: "capitalize" }}>
+            {p.name === "focal" || p.name === "diffuse" ? "-" : p.name}
+          </span>
         </div>
       ))}
     </div>
@@ -168,10 +170,10 @@ export default function TrendsView() {
         </div>
         <div className="flex items-center gap-4 mt-3 pt-3" style={{ borderTop: "1px solid var(--border)" }}>
           <span className="flex items-center gap-1.5 text-xs" style={{ color: "var(--text-secondary)" }}>
-            <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: "var(--blue)" }}/> Focal
+            <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: "var(--blue)" }}/> {/* Focal */ "-"}
           </span>
           <span className="flex items-center gap-1.5 text-xs" style={{ color: "var(--text-secondary)" }}>
-            <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: "var(--teal)" }}/> Diffuse
+            <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: "var(--teal)" }}/> {/* Diffuse */ "-"}
           </span>
         </div>
       </div>

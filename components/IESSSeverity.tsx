@@ -8,7 +8,7 @@ export default function IESSSeverity() {
   const severity  = summary?.severity;
   const score     = severity?.score     ?? 7.2;
   const delta     = severity?.delta24h  ?? 0.8;
-  const interp    = severity?.interpretation ?? "Rising burden driven by right-frontal cluster. Consider escalation of current regimen.";
+  const interp    = severity?.interpretation ?? "-"; // fallback was: "Rising burden driven by right-frontal cluster. Consider escalation of current regimen."
   const filled    = Math.round(score); // how many bars to fill red
 
   const radius = 52;

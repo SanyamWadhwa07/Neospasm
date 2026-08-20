@@ -76,11 +76,11 @@ export default function SpasmAlert() {
                   <span className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>Spasm Detected</span>
                   <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md"
                     style={{ background: "rgba(217,48,37,0.12)", color: "var(--red)", border: "1px solid rgba(217,48,37,0.2)" }}>
-                    Focal · Right Frontal
+                    {/* Focal · Right Frontal */ "-"}
                   </span>
                 </div>
                 <div className="text-xs mt-0.5 font-mono" style={{ color: "var(--text-muted)" }}>
-                  Event #285 · 7s ago · Cluster of 4
+                  {/* Event #285 · 7s ago · Cluster of 4 */ "-"}
                 </div>
               </div>
             </div>

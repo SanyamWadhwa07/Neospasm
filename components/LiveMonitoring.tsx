@@ -142,7 +142,7 @@ export default function LiveMonitoring() {
       {/* Metrics */}
       <div className="flex gap-2 p-3" style={{ background: "#080F1C" }}>
         <MetricTile label="Motion Energy" value="0.82" unit="rel" accent="#FF7070" />
-        <MetricTile label="Pose Asymmetry" value="0.61" unit="idx" accent="#FACC15" />
+        <MetricTile label={/* "Pose Asymmetry" */ "-"} value={/* "0.61" */ "-"} unit={/* "idx" */ "-"} accent="#FACC15" />
         <MetricTile label="Frame Rate" value="30" unit="Hz" />
       </div>
 

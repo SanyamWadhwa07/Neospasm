@@ -97,9 +97,9 @@ export default function EventsView() {
       {/* Stat cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <StatCard label="Total Events"  value={events.length} />
-        <StatCard label="Focal"         value={focalCount}   color="var(--blue)" />
-        <StatCard label="Cluster"       value={clusterCount} color="var(--red)" />
-        <StatCard label="Diffuse"       value={diffuseCount} color="var(--teal)" />
+        <StatCard label={/* "Focal" */ "-"}   value={/* focalCount */ "-"}   color="var(--blue)" />
+        <StatCard label={/* "Cluster" */ "-"} value={/* clusterCount */ "-"} color="var(--red)" />
+        <StatCard label={/* "Diffuse" */ "-"} value={/* diffuseCount */ "-"} color="var(--teal)" />
       </div>
 
       {/* Table card */}
@@ -178,12 +178,12 @@ export default function EventsView() {
                   <div className="flex items-center gap-1.5">
                     <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded-md"
                       style={{ background: bg, color, border: `1px solid ${border}` }}>
-                      {ev.type}
+                      {/* {ev.type} */ "-"}
                     </span>
                     {ev.laterality && (
                       <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded"
                         style={{ background: "var(--page-bg)", color: "var(--text-muted)", border: "1px solid var(--border)" }}>
-                        {side}
+                        {/* {side} */ "-"}
                       </span>
                     )}
                   </div>
@@ -192,7 +192,7 @@ export default function EventsView() {
                 {/* Description */}
                 <div className="hidden sm:block col-span-4">
                   <div className="text-sm font-medium truncate" style={{ color: "var(--text-primary)" }}>
-                    {ev.description}
+                    {/* {ev.description} */ "-"}
                   </div>
                   <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
                     {ev.startFormatted} → {ev.endFormatted}

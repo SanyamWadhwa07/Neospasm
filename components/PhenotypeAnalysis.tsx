@@ -1,6 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
 
+/* ─── Original implementation (disabled) ─────────────────────────────────────
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface SpasmEvent {
@@ -101,19 +103,14 @@ function BodyDiagram({ laterality, aiScore }: { laterality: string | null; aiSco
   return (
     <div className="rounded-xl p-3" style={{ background: "var(--page-bg)", border: "1px solid var(--border)" }}>
       <svg viewBox="0 0 120 148" className="w-full h-28">
-        {/* Head */}
         <circle cx="60" cy="20" r="14" fill="var(--red-light)" stroke="rgba(217,48,37,0.2)" strokeWidth="1"/>
-        {/* Torso */}
         <rect x="38" y="36" width="44" height="46" rx="8" fill="var(--red-light)" stroke="rgba(217,48,37,0.15)" strokeWidth="1"/>
-        {/* Right arm */}
         <rect x="82" y="40" width="18" height="36" rx="7"
           fill={rightActive ? "rgba(217,48,37,0.25)" : "var(--red-light)"}
           stroke={rightActive ? "var(--red)" : "rgba(217,48,37,0.15)"} strokeWidth="1"/>
-        {/* Left arm */}
         <rect x="20" y="40" width="18" height="36" rx="7"
           fill={leftActive ? "rgba(217,48,37,0.25)" : "var(--red-light)"}
           stroke={leftActive ? "var(--red)" : "rgba(217,48,37,0.15)"} strokeWidth="1"/>
-        {/* Legs */}
         <rect x="38" y="82" width="19" height="48" rx="8" fill="var(--red-light)" stroke="rgba(217,48,37,0.15)" strokeWidth="1"/>
         <rect x="63" y="82" width="19" height="48" rx="8" fill="var(--red-light)" stroke="rgba(217,48,37,0.15)" strokeWidth="1"/>
         <text x="15" y="18" fontSize="8" fontWeight="600" fill="var(--text-muted)" fontFamily="var(--font-mono)">L</text>
@@ -130,7 +127,7 @@ function BodyDiagram({ laterality, aiScore }: { laterality: string | null; aiSco
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export default function PhenotypeAnalysis() {
+function PhenotypeAnalysisOriginal() {
   const [data, setData]       = useState<ApiData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState<string | null>(null);
@@ -217,7 +214,6 @@ export default function PhenotypeAnalysis() {
         </div>
       </div>
 
-      {/* Concordance banner */}
       <div className="flex items-start gap-2.5 rounded-lg px-3 py-2.5"
         style={isConcordant
           ? { background: "rgba(11,138,116,0.07)", border: "1px solid rgba(11,138,116,0.15)" }
@@ -237,6 +233,49 @@ export default function PhenotypeAnalysis() {
             {isConcordant ? "Concordant modalities." : "Bilateral pattern."}
           </span>{" "}
           {concordantText}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+──────────────────────────────────────────────────────────────────────────── */
+
+export default function PhenotypeAnalysis() {
+  return (
+    <div className="card p-5">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <div className="label mb-1">Phenotype Analysis</div>
+          <div className="text-sm" style={{ color: "var(--text-secondary)" }}>
+            -
+          </div>
+        </div>
+        <span className="text-[11px] font-bold px-2.5 py-1 rounded-lg"
+          style={{ background: "var(--blue-light)", color: "var(--blue)", border: "1px solid var(--blue-border)" }}>
+          -
+        </span>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 mb-3">
+        <div>
+          <div className="label mb-2">EEG Focality</div>
+          <div className="rounded-xl p-3" style={{ background: "var(--page-bg)", border: "1px solid var(--border)" }}>
+            -
+          </div>
+        </div>
+        <div>
+          <div className="label mb-2">Motor Asymmetry</div>
+          <div className="rounded-xl p-3" style={{ background: "var(--page-bg)", border: "1px solid var(--border)" }}>
+            -
+          </div>
+        </div>
+      </div>
+
+      <div className="flex items-start gap-2.5 rounded-lg px-3 py-2.5"
+        style={{ background: "var(--page-bg)", border: "1px solid var(--border)" }}>
+        <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+          -
         </p>
       </div>
     </div>

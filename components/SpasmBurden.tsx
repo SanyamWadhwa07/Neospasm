@@ -35,7 +35,7 @@ const CustomTooltip = ({ active, payload, label }: {
         <div key={p.name} className="flex items-center gap-2 text-xs">
           <span className="w-2 h-2 rounded-full inline-block"
             style={{ background: p.name === "focal" ? "var(--blue)" : "var(--teal)" }} />
-          <span style={{ color: "var(--text-secondary)", textTransform: "capitalize" }}>{p.name}</span>
+          <span style={{ color: "var(--text-secondary)", textTransform: "capitalize" }}>{/* {p.name} */ "-"}</span>
           <span className="font-mono font-semibold ml-1" style={{ color: "var(--text-primary)" }}>{p.value}</span>
         </div>
       ))}
@@ -122,10 +122,10 @@ export default function SpasmBurden() {
 
       <div className="flex items-center gap-4 mt-2 pt-2" style={{ borderTop: "1px solid var(--border)" }}>
         <span className="flex items-center gap-1.5 text-xs" style={{ color: "var(--text-secondary)" }}>
-          <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: "var(--blue)" }} /> Focal
+          <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: "var(--blue)" }} /> {/* Focal */ "-"}
         </span>
         <span className="flex items-center gap-1.5 text-xs" style={{ color: "var(--text-secondary)" }}>
-          <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: "var(--teal)" }} /> Diffuse
+          <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: "var(--teal)" }} /> {/* Diffuse */ "-"}
         </span>
         <span className="ml-auto text-[11px] font-mono" style={{ color: "var(--text-muted)" }}>μV · events/hr</span>
       </div>
