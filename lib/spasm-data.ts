@@ -106,7 +106,8 @@ function fmtSec(s: number): string {
 function toWallClock(examStartIso: string, offsetSec: number): string {
   const start = new Date(examStartIso);
   const wall  = new Date(start.getTime() + offsetSec * 1000);
-  return wall.toTimeString().slice(0, 5);
+  // Explicit IST (Asia/Kolkata, UTC+5:30) — matches the recording site, not the server's TZ.
+  return wall.toLocaleTimeString("en-GB", { timeZone: "Asia/Kolkata", hour: "2-digit", minute: "2-digit", hour12: false });
 }
 
 // ─── Cluster detection ────────────────────────────────────────────────────────

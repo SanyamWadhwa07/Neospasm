@@ -26,6 +26,12 @@ still referring to one.
 - Patient name/weight, exam date, doctor name
 - Video/audio presence flags, EEG channel count
 
+### Timezone
+All displayed spasm event/exam clock times are shown in **IST (India Standard
+Time, UTC+5:30)** — hardcoded explicitly (`timeZone: "Asia/Kolkata"`) in
+`lib/spasm-data.ts`'s `toWallClock()` and `SpasmBurden.tsx`, not derived from
+the server's or browser's local timezone. This matches the recording site.
+
 ### What's hardcoded (in `lib/spasm-data.ts`)
 - All 23 spasm event timestamps (`RAW`) and their type/laterality/confidence
   classification (`UI_META`) — hand-typed, not parsed from any file

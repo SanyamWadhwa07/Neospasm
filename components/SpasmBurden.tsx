@@ -40,8 +40,9 @@ export default function SpasmBurden() {
     diffuse: 0,         // diffuse breakdown not in timeline; shown as 0
   }));
 
+  // Explicit IST (Asia/Kolkata, UTC+5:30) — matches the recording site, not the browser's TZ.
   const totalLabel = summary
-    ? `${summary.totalSpasms} events · peak ${summary.exam.date ? new Date(summary.exam.date).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }) : "—"}`
+    ? `${summary.totalSpasms} events · peak ${summary.exam.date ? new Date(summary.exam.date).toLocaleTimeString("en-US", { timeZone: "Asia/Kolkata", hour: "2-digit", minute: "2-digit" }) : "—"}`
     : "Loading…";
 
   return (

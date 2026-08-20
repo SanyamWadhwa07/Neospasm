@@ -13,6 +13,12 @@ and EEG channel count all come LIVE from Neurosoft.DB inside the file.
 > timestamps and their type/laterality/confidence classification are
 > hand-typed literals in `lib/spasm-data.ts` (`RAW`/`UI_META`), not parsed
 > from Excel. Only the patient/exam metadata listed above is genuinely live.
+>
+> **Timezone:** all displayed clock times are fixed to **IST (Asia/Kolkata,
+> UTC+5:30)**, explicitly, regardless of where the server or browser is
+> located. If you integrate a `.nspack` from a site outside India, update
+> the `timeZone` in `lib/spasm-data.ts`'s `toWallClock()` and in
+> `SpasmBurden.tsx` accordingly.
 
 ---
 
