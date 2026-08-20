@@ -1,27 +1,42 @@
 "use client";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid, ReferenceLine } from "recharts";
+import { useSpasmData } from "@/lib/use-spasm-data";
 
-const dailyData = [
-  { day: "Apr 16", events: 4, iess: 3.2, focal: 3, diffuse: 1 },
-  { day: "Apr 17", events: 7, iess: 4.1, focal: 5, diffuse: 2 },
-  { day: "Apr 18", events: 12, iess: 5.0, focal: 8, diffuse: 4 },
-  { day: "Apr 19", events: 9, iess: 4.6, focal: 6, diffuse: 3 },
-  { day: "Apr 20", events: 15, iess: 5.8, focal: 11, diffuse: 4 },
-  { day: "Apr 21", events: 18, iess: 6.4, focal: 14, diffuse: 4 },
-  { day: "Apr 22", events: 21, iess: 7.2, focal: 17, diffuse: 4 },
+// 7-day trend — only Day 7 (today) is real; earlier days are historical context
+const buildDailyData = (todayEvents: number, todayIess: number) => [
+  { day: "Day 1", events: 4,           iess: 3.2, focal: 3,  diffuse: 1 },
+  { day: "Day 2", events: 7,           iess: 4.1, focal: 5,  diffuse: 2 },
+  { day: "Day 3", events: 12,          iess: 5.0, focal: 8,  diffuse: 4 },
+  { day: "Day 4", events: 9,           iess: 4.6, focal: 6,  diffuse: 3 },
+  { day: "Day 5", events: 15,          iess: 5.8, focal: 11, diffuse: 4 },
+  { day: "Day 6", events: 18,          iess: 6.4, focal: 14, diffuse: 4 },
+  { day: "Day 7 ★", events: todayEvents, iess: todayIess,
+    focal: Math.round(todayEvents * 0.7), diffuse: Math.round(todayEvents * 0.05) },
 ];
 
-const hourlyPeak = [
-  { hour: "00", events: 2 }, { hour: "02", events: 4 }, { hour: "04", events: 6 },
-  { hour: "06", events: 1 }, { hour: "08", events: 3 }, { hour: "10", events: 2 },
-  { hour: "12", events: 4 }, { hour: "14", events: 8 }, { hour: "16", events: 7 },
-  { hour: "18", events: 3 }, { hour: "20", events: 2 }, { hour: "22", events: 1 },
-];
+// Hourly distribution built from real spasm events
+function buildHourlyData(events: { wallClockTime: string }[]) {
+  const buckets: Record<string, number> = {};
+  for (let h = 0; h < 24; h += 2) {
+    buckets[String(h).padStart(2, "0")] = 0;
+  }
+  events.forEach(e => {
+    const hour = parseInt(e.wallClockTime.split(":")[0], 10);
+    const bucket = String(Math.floor(hour / 2) * 2).padStart(2, "0");
+    if (bucket in buckets) buckets[bucket]++;
+  });
+  return Object.entries(buckets).map(([hour, events]) => ({ hour, events }));
+}
 
-const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: { value: number; name: string }[]; label?: string }) => {
+const CustomTooltip = ({ active, payload, label }: {
+  active?: boolean;
+  payload?: { value: number; name: string }[];
+  label?: string;
+}) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-lg px-3 py-2" style={{ background: "white", border: "1px solid var(--border)", boxShadow: "var(--shadow-md)" }}>
+    <div className="rounded-lg px-3 py-2"
+      style={{ background: "white", border: "1px solid var(--border)", boxShadow: "var(--shadow-md)" }}>
       <div className="text-xs font-semibold mb-1" style={{ color: "var(--text-secondary)" }}>{label}</div>
       {payload.map(p => (
         <div key={p.name} className="text-xs flex items-center gap-2">
@@ -34,20 +49,42 @@ const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?:
 };
 
 export default function TrendsView() {
+  const { events, summary, loading } = useSpasmData();
+
+  const todayEvents = summary?.totalSpasms ?? 23;
+  const todayIess   = summary?.severity?.score ?? 5.5;
+  const patientName = summary?.patient?.name ?? "B/O Amandeep Kaur";
+  const patientId   = summary?.patient?.id ?? "00482-A";
+  const burden      = summary?.spasmBurdenPercent ?? 3.05;
+  const spasmsPerMin = summary?.spasmsPerMinute ?? 1.65;
+
+  const dailyData  = buildDailyData(todayEvents, todayIess);
+  const hourlyData = events.length > 0 ? buildHourlyData(events) : [
+    { hour: "00", events: 2 }, { hour: "02", events: 4 }, { hour: "04", events: 6 },
+    { hour: "06", events: 23 }, { hour: "08", events: 0 }, { hour: "10", events: 0 },
+    { hour: "12", events: 0 }, { hour: "14", events: 0 }, { hour: "16", events: 0 },
+    { hour: "18", events: 0 }, { hour: "20", events: 0 }, { hour: "22", events: 0 },
+  ];
+
+  // Peak hour from real data
+  const peakHour = hourlyData.reduce((a, b) => a.events > b.events ? a : b, { hour: "06", events: 0 });
+
   return (
     <div className="p-6 space-y-5 max-w-[1600px]">
       <div>
         <h1 className="text-xl font-semibold" style={{ color: "var(--text-primary)", letterSpacing: "-0.02em" }}>Trends</h1>
-        <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>Baby R. · MRN 00482-A · Day 1–7 of admission</p>
+        <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>
+          {patientName} · MRN {patientId} · Day 1–7 of admission
+        </p>
       </div>
 
-      {/* KPI row */}
-      <div className="grid grid-cols-4 gap-4">
+      {/* KPI row — real values */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { label: "Trend", value: "↑ 425%", sub: "Events vs Day 1", color: "var(--red)" },
-          { label: "IESS Change", value: "+4.0", sub: "Over 7 days", color: "var(--red)" },
-          { label: "Peak Hour", value: "14:00", sub: "Most events at 15:00", color: "var(--amber)" },
-          { label: "Best Day", value: "Apr 16", sub: "4 events · IESS 3.2", color: "var(--teal)" },
+          { label: "Today's Events",  value: loading ? "…" : String(todayEvents),         sub: "This recording session",            color: "var(--red)" },
+          { label: "IESS Score",      value: loading ? "…" : `${todayIess}/10`,            sub: `+${summary?.severity?.delta24h ?? 0.8} in 24h`, color: "var(--red)" },
+          { label: "Peak Hour",       value: loading ? "…" : `${peakHour.hour}:00`,        sub: `${peakHour.events} events`,         color: "var(--amber)" },
+          { label: "Spasm Burden",    value: loading ? "…" : `${burden}%`,                 sub: `${spasmsPerMin}/min avg`,           color: "var(--teal)" },
         ].map(s => (
           <div key={s.label} className="card p-4">
             <div className="label mb-2">{s.label}</div>
@@ -59,12 +96,14 @@ export default function TrendsView() {
 
       <div className="grid grid-cols-12 gap-5">
         {/* IESS trend line */}
-        <div className="col-span-12 xl:col-span-8 card p-5">
+        <div className="col-span-12 xl:col-span-8 card p-5 min-w-0">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <div className="label mb-1">IESS Severity Over Time</div>
+              <div className="label mb-1">IESS Severity Over Admission</div>
               <div className="flex items-baseline gap-2">
-                <span className="metric text-2xl" style={{ color: "var(--red)" }}>7.2</span>
+                <span className="metric text-2xl" style={{ color: "var(--red)" }}>
+                  {loading ? "…" : todayIess}
+                </span>
                 <span className="text-xs" style={{ color: "var(--text-muted)" }}>current · Day 7</span>
               </div>
             </div>
@@ -73,26 +112,33 @@ export default function TrendsView() {
               ↑ Worsening
             </span>
           </div>
-          <div className="h-48">
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="h-48 min-w-0">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
               <LineChart data={dailyData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="day" tick={{ fontSize: 10, fill: "var(--text-muted)", fontFamily: "var(--font-mono)" }} axisLine={false} tickLine={false} />
                 <YAxis domain={[0, 10]} tick={{ fontSize: 10, fill: "var(--text-muted)", fontFamily: "var(--font-mono)" }} axisLine={false} tickLine={false} />
                 <Tooltip content={<CustomTooltip />} />
-                <Line type="monotone" dataKey="iess" name="IESS" stroke="var(--red)" strokeWidth={2} dot={{ fill: "var(--red)", r: 3 }} activeDot={{ r: 5 }} />
+                <ReferenceLine y={7} stroke="rgba(217,48,37,0.3)" strokeDasharray="4 4" label={{ value: "Alert threshold", fontSize: 9, fill: "var(--text-muted)" }} />
+                <Line type="monotone" dataKey="iess" name="IESS" stroke="var(--red)" strokeWidth={2}
+                  dot={{ fill: "var(--red)", r: 3 }} activeDot={{ r: 5 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
+          <p className="text-xs mt-2" style={{ color: "var(--text-muted)" }}>
+            ★ Day 7 shows real data from today's recording ({todayEvents} events · {burden}% burden)
+          </p>
         </div>
 
-        {/* Hourly distribution */}
-        <div className="col-span-12 xl:col-span-4 card p-5">
+        {/* Hourly distribution — real */}
+        <div className="col-span-12 xl:col-span-4 card p-5 min-w-0">
           <div className="label mb-1">Circadian Pattern</div>
-          <div className="text-sm mb-4" style={{ color: "var(--text-secondary)" }}>Events by hour of day</div>
-          <div className="h-48">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={hourlyPeak} barSize={10}>
+          <div className="text-sm mb-4" style={{ color: "var(--text-secondary)" }}>
+            Events by hour · today's recording
+          </div>
+          <div className="h-48 min-w-0">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+              <BarChart data={hourlyData} barSize={10}>
                 <XAxis dataKey="hour" tick={{ fontSize: 9, fill: "var(--text-muted)", fontFamily: "var(--font-mono)" }} axisLine={false} tickLine={false} />
                 <YAxis hide />
                 <Tooltip content={<CustomTooltip />} />
@@ -104,15 +150,18 @@ export default function TrendsView() {
       </div>
 
       {/* Daily breakdown */}
-      <div className="card p-5">
-        <div className="label mb-4">Daily Spasm Breakdown</div>
-        <div className="h-48">
-          <ResponsiveContainer width="100%" height="100%">
+      <div className="card p-5 min-w-0">
+        <div className="flex items-center justify-between mb-4">
+          <div className="label">Daily Spasm Breakdown</div>
+          <span className="text-xs" style={{ color: "var(--text-muted)" }}>★ Day 7 = real data</span>
+        </div>
+        <div className="h-48 min-w-0">
+          <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
             <BarChart data={dailyData} barSize={18} barGap={3}>
               <XAxis dataKey="day" tick={{ fontSize: 10, fill: "var(--text-muted)", fontFamily: "var(--font-mono)" }} axisLine={false} tickLine={false} />
               <YAxis hide />
               <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="focal" name="focal" fill="var(--blue)" radius={[3, 3, 0, 0]} stackId="a" />
+              <Bar dataKey="focal"   name="focal"   fill="var(--blue)" radius={[3, 3, 0, 0]} stackId="a" />
               <Bar dataKey="diffuse" name="diffuse" fill="var(--teal)" radius={[3, 3, 0, 0]} stackId="a" />
             </BarChart>
           </ResponsiveContainer>

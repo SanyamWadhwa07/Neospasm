@@ -1,10 +1,28 @@
+"use client";
+import { useSpasmData } from "@/lib/use-spasm-data";
+
 export default function PatientCard() {
+  const { summary, loading } = useSpasmData();
+  const patient = summary?.patient;
+  const exam    = summary?.exam;
+
+  // Format exam date as "Jan 13" style
+  const admitDate = exam?.date
+    ? new Date(exam.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+    : "—";
+
   const fields = [
-    { label: "Etiology", value: "Structural (R MCD)", priority: true },
-    { label: "Clinician", value: "Dr. K. Arora", priority: true },
-    { label: "Admitted", value: "Apr 15", priority: false },
-    { label: "Weight", value: "7.2 kg", priority: false },
+    { label: "Etiology",  value: patient?.etiology  ?? "Structural (R MCD)", priority: true },
+    { label: "Clinician", value: patient?.clinician  ?? "Dr. K. Arora",       priority: true },
+    { label: "Admitted",  value: admitDate,                                   priority: false },
+    { label: "Weight",    value: patient?.weightKg ? `${patient.weightKg} kg` : "7.2 kg", priority: false },
   ];
+
+  const sexLabel  = patient?.sex === "F" ? "F" : patient?.sex === "M" ? "M" : "F";
+  const ageLabel  = patient?.ageMonths ? `${patient.ageMonths} mo` : "6 mo";
+  const dayLabel  = patient?.dayOfAdmission ? `Day ${patient.dayOfAdmission}` : "Day 3";
+  const nameLabel = loading ? "Loading…" : (patient?.name ?? "B/O Amandeep Kaur");
+  const idLabel   = patient?.id ?? "00482-A";
 
   return (
     <div className="card flex items-center gap-0 overflow-hidden">
@@ -22,13 +40,17 @@ export default function PatientCard() {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Baby R.</span>
+              <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+                {nameLabel}
+              </span>
               <span className="text-[10px] font-mono font-medium px-1.5 py-0.5 rounded"
                 style={{ background: "var(--blue-light)", color: "var(--blue)", border: "1px solid var(--blue-border)" }}>
-                00482-A
+                {idLabel}
               </span>
             </div>
-            <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>F · 6 mo · Day 3</div>
+            <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
+              {sexLabel} · {ageLabel} · {dayLabel}
+            </div>
           </div>
         </div>
 

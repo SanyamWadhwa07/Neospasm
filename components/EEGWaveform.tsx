@@ -1,3 +1,4 @@
+// components/EEGWaveform.tsx
 "use client";
 import { useEffect, useRef } from "react";
 
@@ -20,13 +21,11 @@ function generateWavePath(seed: number, width: number, height: number): string {
 export default function EEGWaveform() {
   const svgRefs = useRef<(SVGPathElement | null)[]>([]);
   const frameRef = useRef<number>(0);
-  const offsetRef = useRef(0);
 
   useEffect(() => {
     let t = 0;
     const animate = () => {
       t += 0.02;
-      offsetRef.current = t;
       svgRefs.current.forEach((el, i) => {
         if (!el) return;
         const width = el.closest("svg")?.clientWidth ?? 300;
@@ -52,6 +51,7 @@ export default function EEGWaveform() {
               strokeWidth="1"
               strokeLinecap="round"
               strokeLinejoin="round"
+              suppressHydrationWarning
             />
           </svg>
         </div>

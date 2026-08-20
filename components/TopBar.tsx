@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useSpasmData } from "@/lib/use-spasm-data";
 import type { NavId } from "@/app/page";
 
 const viewLabels: Record<NavId, string> = {
@@ -21,7 +22,12 @@ export default function TopBar({
   onNavChange: (id: NavId) => void;
   onMenuClick: () => void;
 }) {
-  const [time, setTime] = useState("14:23:47");
+  const [time, setTime] = useState("--:--:--");
+  const { summary } = useSpasmData();
+
+  // Use real patient name; fall back gracefully while loading
+  const patientName = summary?.patient?.name ?? "Baby R.";
+  const patientId   = summary?.patient?.id   ?? "00482-A";
 
   useEffect(() => {
     const tick = () => {
@@ -55,12 +61,16 @@ export default function TopBar({
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2.5" strokeLinecap="round" className="hidden sm:block">
           <path d="M9 18l6-6-6-6"/>
         </svg>
-        <span className="hidden sm:block" style={{ color: "var(--text-secondary)" }}>Baby R.</span>
+        <span className="hidden sm:block truncate max-w-[160px]" style={{ color: "var(--text-secondary)" }}>
+          {patientName}
+        </span>
         <span className="hidden sm:block" style={{ color: "var(--text-muted)" }}>·</span>
-        <span className="font-mono text-xs hidden sm:block" style={{ color: "var(--text-muted)" }}>MRN 00482-A</span>
+        <span className="font-mono text-xs hidden sm:block" style={{ color: "var(--text-muted)" }}>
+          MRN {patientId}
+        </span>
       </div>
 
-      {/* Search — hidden on mobile */}
+      {/* Search */}
       <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg ml-1 w-44 lg:w-52 transition-all focus-within:w-60"
         style={{ background: "white", border: "1px solid var(--border)", boxShadow: "var(--shadow-xs)" }}>
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2.5" strokeLinecap="round">
@@ -69,7 +79,8 @@ export default function TopBar({
         <input type="text" placeholder="Search…" className="text-sm bg-transparent outline-none flex-1 min-w-0"
           style={{ color: "var(--text-primary)", fontFamily: "var(--font-ui)" }}
         />
-        <kbd className="hidden lg:block text-[10px] font-mono px-1.5 py-0.5 rounded" style={{ background: "var(--page-bg)", color: "var(--text-muted)", border: "1px solid var(--border)" }}>⌘K</kbd>
+        <kbd className="hidden lg:block text-[10px] font-mono px-1.5 py-0.5 rounded"
+          style={{ background: "var(--page-bg)", color: "var(--text-muted)", border: "1px solid var(--border)" }}>⌘K</kbd>
       </div>
 
       <div className="flex-1" />
@@ -84,7 +95,7 @@ export default function TopBar({
         <span className="hidden sm:inline">1 ACTIVE ALERT</span>
       </div>
 
-      {/* Clock — large screens only */}
+      {/* Clock */}
       <div className="font-mono text-sm tabular-nums hidden xl:block" style={{ color: "var(--text-muted)", letterSpacing: "0.04em" }}>
         {time}
       </div>
@@ -102,7 +113,7 @@ export default function TopBar({
           style={{ background: "var(--red)" }}>4</span>
       </div>
 
-      {/* Share — hidden on mobile */}
+      {/* Share */}
       <button className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all"
         style={{ background: "white", border: "1px solid var(--border)", color: "var(--text-secondary)", boxShadow: "var(--shadow-xs)" }}>
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -113,7 +124,8 @@ export default function TopBar({
       </button>
 
       {/* Generate report */}
-      <button onClick={() => onNavChange("reports")} className="flex items-center gap-1.5 px-3 md:px-3.5 py-1.5 rounded-lg text-sm font-semibold text-white transition-all"
+      <button onClick={() => onNavChange("reports")}
+        className="flex items-center gap-1.5 px-3 md:px-3.5 py-1.5 rounded-lg text-sm font-semibold text-white transition-all"
         style={{ background: "linear-gradient(135deg, #2563EB, #1D4ED8)", boxShadow: "0 1px 4px rgba(25,103,210,0.35)" }}>
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
