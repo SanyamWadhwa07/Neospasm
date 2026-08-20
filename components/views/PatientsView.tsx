@@ -10,7 +10,7 @@ const statusStyle: Record<string, { bg: string; color: string; border: string }>
 
 export default function PatientsView() {
   const [selected, setSelected] = useState<string | null>("00482-A");
-  const { summary, loading } = useSpasmData();
+  const { summary, events, loading } = useSpasmData();
 
   // Real patient from API — others remain as ward context (mock)
   const realPatient = summary ? {
@@ -25,7 +25,7 @@ export default function PatientsView() {
     iess:      summary.severity.score,
     clinician: summary.patient.clinician,
     etiology:  summary.patient.etiology,
-    lastEvent: summary.events?.[summary.totalSpasms - 1]?.wallClockTime ?? "—",
+    lastEvent: events[events.length - 1]?.wallClockTime ?? "—",
     ward:      "3B-04",
   } : null;
 
