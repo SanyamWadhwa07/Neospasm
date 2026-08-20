@@ -20,7 +20,7 @@ export type NavId = "dashboard" | "patients" | "eeg" | "events" | "reports" | "t
 
 function DashboardView() {
   return (
-    <div className="p-4 md:p-6 space-y-4 max-w-[1400px]">
+    <div className="px-4 pt-6 pb-4 md:px-10 md:pt-8 md:pb-6 space-y-4 max-w-[1400px]">
       <PatientCard />
 
       {/* Main grid: clinical data left, live monitoring right */}
@@ -74,7 +74,7 @@ export default function Dashboard() {
         onClose={() => setSidebarOpen(false)}
       />
 
-      <div className="flex-1 flex flex-col md:ml-56 min-w-0 overflow-hidden">
+      <div className="flex-1 flex flex-col md:ml-60 min-w-0 overflow-hidden">
         <TopBar
           activeView={activeView}
           onNavChange={setActiveView}

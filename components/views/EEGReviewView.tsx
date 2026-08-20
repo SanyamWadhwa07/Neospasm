@@ -145,7 +145,7 @@ export default function EEGReviewView() {
     : "14:00";
 
   return (
-    <div className="p-6 space-y-5 max-w-[1600px]">
+    <div className="px-4 pt-6 pb-4 md:px-10 md:pt-8 md:pb-6 space-y-5 max-w-[1600px]">
 
       {/* ── Header ── */}
       <div className="flex items-center justify-between">
@@ -248,7 +248,10 @@ export default function EEGReviewView() {
 
             {/* Waveform */}
             <div style={{ background: "#060D1A", padding: "16px 8px" }}>
-              <EEGWaveform />
+              <EEGWaveform
+                channels={FALLBACK_CHANNELS.filter(ch => activeChannels.has(ch))}
+                heightPx={32}
+              />
             </div>
 
             {/* Timeline scrubber — real spasm positions */}

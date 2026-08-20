@@ -70,7 +70,7 @@ export default function TrendsView() {
   const peakHour = hourlyData.reduce((a, b) => a.events > b.events ? a : b, { hour: "06", events: 0 });
 
   return (
-    <div className="p-6 space-y-5 max-w-[1600px]">
+    <div className="px-4 pt-6 pb-4 md:px-10 md:pt-8 md:pb-6 space-y-5 max-w-[1600px]">
       <div>
         <h1 className="text-xl font-semibold" style={{ color: "var(--text-primary)", letterSpacing: "-0.02em" }}>Trends</h1>
         <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>
