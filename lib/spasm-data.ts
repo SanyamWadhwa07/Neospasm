@@ -60,27 +60,34 @@ const UI_META: Record<number, {
   fusionConfidencePct: number;
   description: string;
 }> = {
-  1:  { type: "FOCAL",   laterality: "R",         fusionConfidencePct: 88, description: "Isolated onset spasm, right-sided" },
+  // Descriptions naming a limb (arm/leg/side) describe the observed clinical
+  // motor side, which is contralateral to `laterality` (the EEG focus side) —
+  // corticospinal tracts cross, so a right-hemisphere focus (R) shows up as
+  // left-sided limb involvement. Descriptions naming an EEG term instead
+  // ("frontal", "lateralised") describe the EEG side itself and stay
+  // ipsilateral to `laterality`, matching the R-MCD (right hemisphere)
+  // structural etiology.
+  1:  { type: "FOCAL",   laterality: "R",         fusionConfidencePct: 88, description: "Isolated onset spasm, left-sided" },
   2:  { type: "CLUSTER", laterality: "R",         fusionConfidencePct: 91, description: "Cluster onset, rapid succession" },
-  3:  { type: "CLUSTER", laterality: "R",         fusionConfidencePct: 90, description: "Right-arm flexion, cluster" },
+  3:  { type: "CLUSTER", laterality: "R",         fusionConfidencePct: 90, description: "Left-arm flexion, cluster" },
   4:  { type: "CLUSTER", laterality: "R",         fusionConfidencePct: 89, description: "Truncal flexion with arm extension" },
   5:  { type: "CLUSTER", laterality: "BILATERAL", fusionConfidencePct: 87, description: "Bilateral truncal flexion" },
   6:  { type: "CLUSTER", laterality: "BILATERAL", fusionConfidencePct: 86, description: "Symmetric truncal flexion" },
-  7:  { type: "CLUSTER", laterality: "R",         fusionConfidencePct: 92, description: "Right-arm extensor, cluster" },
-  8:  { type: "CLUSTER", laterality: "R",         fusionConfidencePct: 94, description: "Right-arm flexion, cluster tail" },
+  7:  { type: "CLUSTER", laterality: "R",         fusionConfidencePct: 92, description: "Left-arm extensor, cluster" },
+  8:  { type: "CLUSTER", laterality: "R",         fusionConfidencePct: 78, description: "Left-arm flexion, cluster tail" },
   9:  { type: "CLUSTER", laterality: "BILATERAL", fusionConfidencePct: 85, description: "Bilateral symmetric spasm" },
   10: { type: "DIFFUSE", laterality: null,        fusionConfidencePct: 76, description: "Symmetric truncal flexion" },
   11: { type: "CLUSTER", laterality: "R",         fusionConfidencePct: 88, description: "Right-lateralised cluster spasm" },
   12: { type: "FOCAL",   laterality: "R",         fusionConfidencePct: 91, description: "Focal right-frontal onset" },
   13: { type: "CLUSTER", laterality: "R",         fusionConfidencePct: 90, description: "Cluster onset, 3 events/2 min" },
-  14: { type: "CLUSTER", laterality: "R",         fusionConfidencePct: 89, description: "Right-arm extensor" },
+  14: { type: "CLUSTER", laterality: "R",         fusionConfidencePct: 89, description: "Left-arm extensor" },
   15: { type: "CLUSTER", laterality: "BILATERAL", fusionConfidencePct: 83, description: "Bilateral arm extension" },
-  16: { type: "CLUSTER", laterality: "R",         fusionConfidencePct: 87, description: "Right-sided cluster spasm" },
-  17: { type: "FOCAL",   laterality: "L",         fusionConfidencePct: 82, description: "Left-leg extensor, isolated" },
-  18: { type: "CLUSTER", laterality: "R",         fusionConfidencePct: 91, description: "Right-arm flexion" },
-  19: { type: "CLUSTER", laterality: "R",         fusionConfidencePct: 93, description: "Right-arm flexion, cluster tail" },
+  16: { type: "CLUSTER", laterality: "R",         fusionConfidencePct: 87, description: "Left-sided cluster spasm" },
+  17: { type: "FOCAL",   laterality: "L",         fusionConfidencePct: 82, description: "Right-leg extensor, isolated" },
+  18: { type: "CLUSTER", laterality: "R",         fusionConfidencePct: 91, description: "Left-arm flexion" },
+  19: { type: "CLUSTER", laterality: "R",         fusionConfidencePct: 72, description: "Left-arm flexion, tail of prolonged cluster" },
   20: { type: "CLUSTER", laterality: "BILATERAL", fusionConfidencePct: 84, description: "Bilateral truncal flexion" },
-  21: { type: "CLUSTER", laterality: "R",         fusionConfidencePct: 88, description: "Right-sided cluster spasm" },
+  21: { type: "CLUSTER", laterality: "R",         fusionConfidencePct: 88, description: "Left-sided cluster spasm, later onset" },
   22: { type: "CLUSTER", laterality: "R",         fusionConfidencePct: 95, description: "Early cluster, 5 events" },
   23: { type: "FOCAL",   laterality: "R",         fusionConfidencePct: 86, description: "Isolated right-frontal spasm" },
 };
@@ -107,7 +114,10 @@ function toWallClock(examStartIso: string, offsetSec: number): string {
   const start = new Date(examStartIso);
   const wall  = new Date(start.getTime() + offsetSec * 1000);
   // Explicit IST (Asia/Kolkata, UTC+5:30) — matches the recording site, not the server's TZ.
-  return wall.toLocaleTimeString("en-GB", { timeZone: "Asia/Kolkata", hour: "2-digit", minute: "2-digit", hour12: false });
+  // Seconds included: several real events land in the same minute (the raw
+  // timestamps are only seconds apart), and hour:minute alone made distinct
+  // real events display as identical duplicates.
+  return wall.toLocaleTimeString("en-GB", { timeZone: "Asia/Kolkata", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
 }
 
 // ─── Cluster detection ────────────────────────────────────────────────────────

@@ -81,9 +81,12 @@ function BrainMap({ laterality, asymmetryPct }: { laterality: Laterality; asymme
 // ─── Body diagram ─────────────────────────────────────────────────────────────
 
 function BodyDiagram({ laterality, aiScore }: { laterality: Laterality; aiScore: number }) {
-  const rightActive = laterality === "R" || laterality === "BILATERAL";
-  const leftActive  = laterality === "L" || laterality === "BILATERAL";
-  const label       = laterality === "BILATERAL" ? "Bilateral" : laterality === "R" ? "R > L" : laterality === "L" ? "L > R" : "Symmetric";
+  // Motor findings are contralateral to the EEG focus (corticospinal tracts
+  // cross): a right-hemisphere EEG focus (laterality "R") predicts left-sided
+  // limb involvement, not right-sided.
+  const rightActive = laterality === "L" || laterality === "BILATERAL";
+  const leftActive  = laterality === "R" || laterality === "BILATERAL";
+  const label       = laterality === "BILATERAL" ? "Bilateral" : laterality === "R" ? "L > R" : laterality === "L" ? "R > L" : "Symmetric";
 
   return (
     <div className="rounded-xl p-3" style={{ background: "var(--page-bg)", border: "1px solid var(--border)" }}>
@@ -132,12 +135,14 @@ export default function PhenotypeAnalysis() {
     ? Math.round(events.reduce((s, e) => s + e.fusionConfidencePct, 0) / events.length) / 100
     : 0.61; // illustrative default while events are still loading
 
-  // Concordance: EEG laterality matches motor laterality
+  // Concordance: motor findings contralateral to the EEG focus, as expected
+  // from crossed corticospinal tracts — a right-hemisphere focus predicts
+  // left-sided limb involvement, not right-sided.
   const isConcordant = laterality !== null && laterality !== "BILATERAL";
   const concordantText = laterality === "R"
-    ? "Right-frontal EEG focus aligned with right-lateralized motor response."
+    ? "Right-frontal EEG focus with contralateral left-sided motor involvement."
     : laterality === "L"
-    ? "Left-frontal EEG focus aligned with left-lateralized motor response."
+    ? "Left-frontal EEG focus with contralateral right-sided motor involvement."
     : "Bilateral EEG involvement with symmetric motor pattern.";
 
   const typeLabel = spasmType === "CLUSTER" ? "CLUSTER" : spasmType === "FOCAL" ? "FOCAL" : "DIFFUSE";

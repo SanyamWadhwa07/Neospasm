@@ -23,7 +23,7 @@ const sections = [
 ];
 
 const meds = [
-  { name: "ACTH",       dose: "40 IU/m²/day",  start: "Day 1", response: "Partial (32% reduction)", status: "Active" },
+  { name: "ACTH",       dose: "40 IU/m²/day",  start: "Day 1", response: "Response under evaluation", status: "Active" },
   { name: "Vigabatrin", dose: "100 mg/kg/day",  start: "Day 2", response: "Augmentation ongoing",    status: "Active" },
   { name: "Pyridoxine", dose: "100 mg/day",     start: "Day 1", response: "No isolated response",    status: "Discontinued" },
 ];
@@ -190,7 +190,7 @@ function generatePDF(
     const summaryText = [
       `${patientName} is a 6-month-old female admitted on Day 3 with infantile epileptic spasm syndrome (IESS). The IESS severity score is ${iessScore}/10, with ${totalSpasms} spasms recorded in this EEG session (${burden}% recording burden).`,
       `${clusterCount} cluster-type and ${focalCount} focal spasms were detected. The predominant phenotype is right-frontal with concordant EEG focality. Average inter-spasm interval was ${events.length > 1 ? events[1].interSpasmInterval ?? "—" : "—"}s; these spasms recurred in rapid succession.`,
-      `Current treatment with ACTH and Vigabatrin has produced a partial 32% reduction in event frequency. Continued monitoring and possible dose adjustment are recommended. ${iessInterp}`,
+      `Patient is currently on ACTH and Vigabatrin per standard IESS protocol. Response has not yet been quantified from this single recording session; continued monitoring and possible dose adjustment are recommended. ${iessInterp}`,
     ];
 
     summaryText.forEach(para => {
