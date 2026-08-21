@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
-import EEGWaveform from "@/components/EEGWaveform";
+import Image from "next/image";
+import EEGWaveform, { BIPOLAR_MONTAGE } from "@/components/EEGWaveform";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -62,22 +63,33 @@ function spasmToAnnotation(e: SpasmEvent) {
     e.type === "CLUSTER" ? "alert" :
     e.type === "FOCAL"   ? "alert" : "info";
   const ch =
-    e.laterality === "R" ? "Fp2" :
-    e.laterality === "L" ? "Fp1" : "Cz";
-  return { time: e.wallClockTime, label: typeLabel, type: annotType, ch };
+    e.laterality === "R" ? "FP2-C4" :
+    e.laterality === "L" ? "FP1-C3" : "FZ-CZ";
+  return { time: e.wallClockTime, label: typeLabel, type: annotType, ch, startSec: e.startSec };
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-const FALLBACK_CHANNELS = ["Fp1","Fp2","F3","F4","C3","C4","P3","P4","O1","O2","T3","T4","F7","F8"];
-
-export default function EEGReviewView() {
+export default function EEGReviewView({ initialSeekSec }: { initialSeekSec?: number | null } = {}) {
   const [gain, setGain]   = useState(50);
   const [speed, setSpeed] = useState(30);
   const [activeMontage, setActiveMontage] = useState("Bipolar");
+  const [showMontageRef, setShowMontageRef] = useState(false);
+  const [frozen, setFrozen] = useState(false);
   const [activeChannels, setActiveChannels] = useState<Set<string>>(
-    new Set(["Fp1","Fp2","F3","F4","C3","C4","P3","P4"])
+    new Set(BIPOLAR_MONTAGE)
   );
+  // Which point in the recording the waveform panel is showing — seeking to
+  // an event (marker or annotation click) moves both this and the scrubber
+  // dot together, so the trace on screen always matches the time everything
+  // else on the page is talking about.
+  const [viewStartSec, setViewStartSec] = useState(0);
+
+  // Jump here when arriving via "Review" on an alert or an event row elsewhere
+  // in the app — each such navigation carries a fresh seek target.
+  useEffect(() => {
+    if (initialSeekSec != null) setViewStartSec(Math.max(0, initialSeekSec - 5));
+  }, [initialSeekSec]);
 
   const [data, setData]       = useState<ApiData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -99,6 +111,29 @@ export default function EEGReviewView() {
         setLoading(false);
       });
   }, []);
+
+  // Exports the real decoded samples for the window currently on screen —
+  // not a true clinical EDF (this app doesn't write that binary format), so
+  // the button is honest about what it actually produces: real data, as CSV.
+  async function handleExportCsv() {
+    const res = await fetch(`/api/eeg?start=${Math.max(0, viewStartSec)}`);
+    const json: { sampleRateHz: number; channels: { label: string; samples: number[] }[] } = await res.json();
+    const channels = json.channels ?? [];
+    if (channels.length === 0) return;
+    const header = ["sample_index", ...channels.map(c => c.label)].join(",");
+    const rowCount = Math.max(...channels.map(c => c.samples.length));
+    const rows = Array.from({ length: rowCount }, (_, i) =>
+      [i, ...channels.map(c => c.samples[i] ?? "")].join(",")
+    );
+    const csv = [header, ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `NeoSpasm_EEG_${Math.round(viewStartSec)}s.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 
   function toggleChannel(ch: string) {
     setActiveChannels(prev => {
@@ -191,21 +226,28 @@ export default function EEGReviewView() {
         )}
 
         <div className="flex items-center gap-2">
-          <span className="flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-lg"
+          <span className="text-[11px] font-semibold px-3 py-1.5 rounded-lg"
             style={{ background: "var(--red-light)", color: "var(--red)", border: "1px solid var(--red-border)" }}>
-            <span className="w-1.5 h-1.5 rounded-full animate-pulse-dot" style={{ background: "var(--red)" }}/>
             LIVE
           </span>
-          <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold transition-all"
-            style={{ background: "var(--page-bg)", border: "1px solid var(--border)", color: "var(--text-secondary)" }}>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-              <rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>
-            </svg>
-            Freeze
+          <button onClick={() => setFrozen(f => !f)}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold transition-all"
+            style={frozen
+              ? { background: "var(--blue-light)", border: "1px solid var(--blue-border)", color: "var(--blue)" }
+              : { background: "var(--page-bg)", border: "1px solid var(--border)", color: "var(--text-secondary)" }}>
+            {frozen ? (
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            ) : (
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>
+              </svg>
+            )}
+            {frozen ? "Resume" : "Freeze"}
           </button>
-          <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold text-white transition-all"
+          <button onClick={handleExportCsv}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold text-white transition-all"
             style={{ background: "linear-gradient(135deg, var(--blue), #1D4ED8)" }}>
-            Export EDF
+            Export CSV
           </button>
         </div>
       </div>
@@ -217,7 +259,7 @@ export default function EEGReviewView() {
           <div className="card overflow-hidden">
 
             {/* Controls bar */}
-            <div className="flex items-center gap-6 px-5 py-3"
+            <div className="flex flex-wrap items-center gap-3 sm:gap-6 px-5 py-3"
               style={{ borderBottom: "1px solid var(--border)", background: "var(--page-bg)" }}>
               <div className="flex items-center gap-2">
                 <span className="label">Gain</span>
@@ -238,39 +280,61 @@ export default function EEGReviewView() {
                     onClick={() => setActiveMontage(m)}
                     className="text-[11px] font-semibold px-2.5 py-1 rounded-md transition-all"
                     style={m === activeMontage
-                      ? { background: "white", color: "var(--blue)", border: "1px solid var(--border)", boxShadow: "var(--shadow-xs)" }
+                      ? { background: "var(--card-bg)", color: "var(--blue)", border: "1px solid var(--border)", boxShadow: "var(--shadow-xs)" }
                       : { background: "transparent", color: "var(--text-muted)" }}>
                     {m}
                   </button>
                 ))}
+                <button onClick={() => setShowMontageRef(true)}
+                  className="text-[11px] font-semibold px-2.5 py-1 rounded-md transition-all"
+                  style={{ background: "transparent", color: "var(--blue)", border: "1px solid var(--blue-border)" }}>
+                  Electrode scheme
+                </button>
               </div>
             </div>
 
-            {/* Waveform */}
-            <div style={{ background: "#060D1A", padding: "16px 8px" }}>
-              <EEGWaveform
-                channels={FALLBACK_CHANNELS.filter(ch => activeChannels.has(ch))}
-                heightPx={32}
-              />
+            {/* Waveform — real amplitude traces, paper-style like the recording software's own reader.
+                Windowed at viewStartSec, so it always shows the segment the scrubber dot points at. */}
+            <div style={{ background: "var(--page-bg)", padding: "16px 8px" }}>
+              {frozen ? (
+                <div className="h-32 flex items-center justify-center text-sm" style={{ color: "var(--text-muted)" }}>
+                  Frozen at {String(Math.floor(viewStartSec / 60)).padStart(2,"0")}:{String(Math.round(viewStartSec % 60)).padStart(2,"0")}
+                </div>
+              ) : (
+                <EEGWaveform
+                  channels={BIPOLAR_MONTAGE.filter(ch => activeChannels.has(ch))}
+                  heightPx={32}
+                  startSec={viewStartSec}
+                />
+              )}
             </div>
 
-            {/* Timeline scrubber — real spasm positions */}
+            {/* Timeline scrubber — real spasm positions, click a marker to jump the waveform there */}
             <div className="px-5 py-3" style={{ borderTop: "1px solid var(--border)", background: "var(--page-bg)" }}>
               <div className="flex items-center gap-3">
                 <span className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>00:00</span>
-                <div className="flex-1 relative h-4 flex items-center">
+                <div
+                  className="flex-1 relative h-4 flex items-center cursor-pointer"
+                  onClick={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const pct = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
+                    setViewStartSec(Math.round(pct * totalSec));
+                  }}
+                >
                   <div className="w-full h-1.5 rounded-full" style={{ background: "var(--border)" }}>
                     <div className="h-full rounded-full"
-                      style={{ width: "62%", background: "linear-gradient(90deg, var(--blue), var(--teal))" }}/>
+                      style={{ width: `${secToTimeline(viewStartSec, totalSec)}%`, background: "linear-gradient(90deg, var(--blue), var(--teal))" }}/>
                   </div>
                   <div className="absolute w-3 h-3 rounded-full border-2 border-white shadow"
-                    style={{ left: "62%", background: "var(--blue)", transform: "translateX(-50%)" }}/>
+                    style={{ left: `${secToTimeline(viewStartSec, totalSec)}%`, background: "var(--blue)", transform: "translateX(-50%)" }}/>
 
-                  {/* Real spasm markers from API */}
+                  {/* Real spasm markers from API — click to seek the waveform to that event */}
                   {spasmMarkers.map((pct, i) => (
-                    <div key={i} className="absolute w-1 h-3 rounded-sm"
-                      title={`Spasm ${i + 1} at ${events[i]?.wallClockTime}`}
-                      style={{ left: `${pct}%`, background: "var(--red)", opacity: 0.75 }}/>
+                    <button key={i}
+                      onClick={(e) => { e.stopPropagation(); setViewStartSec(Math.max(0, events[i].startSec - 5)); }}
+                      className="absolute w-1 h-3 rounded-sm"
+                      title={`Spasm ${i + 1} at ${events[i]?.wallClockTime} — click to view`}
+                      style={{ left: `${pct}%`, background: "var(--red)", opacity: 0.75, transform: "translateX(-50%)" }}/>
                   ))}
                 </div>
                 <span className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>{durationLabel}</span>
@@ -290,6 +354,9 @@ export default function EEGReviewView() {
                     {data.summary.spasmsPerMinute}/min · burden {data.summary.spasmBurdenPercent}%
                   </span>
                 )}
+                <span className="text-[10px] font-mono ml-auto" style={{ color: "var(--text-muted)" }}>
+                  viewing {String(Math.floor(viewStartSec / 60)).padStart(2,"0")}:{String(Math.round(viewStartSec % 60)).padStart(2,"0")}
+                </span>
               </div>
             </div>
           </div>
@@ -309,11 +376,11 @@ export default function EEGReviewView() {
               )}
             </div>
             <div className="grid grid-cols-2 gap-1">
-              {FALLBACK_CHANNELS.map(ch => {
+              {BIPOLAR_MONTAGE.map(ch => {
                 const on = activeChannels.has(ch);
                 return (
                   <button key={ch} onClick={() => toggleChannel(ch)}
-                    className="text-[11px] font-mono font-semibold px-2 py-1.5 rounded-md transition-all text-left"
+                    className="text-[10px] font-mono font-semibold px-2 py-1.5 rounded-md transition-all text-left"
                     style={on
                       ? { background: "var(--blue-light)", color: "var(--blue)", border: "1px solid var(--blue-border)" }
                       : { background: "var(--page-bg)", color: "var(--text-muted)", border: "1px solid var(--border)" }
@@ -356,22 +423,23 @@ export default function EEGReviewView() {
                 </div>
               ) : (
                 annotations.map((a, i) => (
-                  <div key={i}
-                    className="flex items-start gap-2.5 px-4 py-2.5 transition-colors"
+                  <button key={i}
+                    onClick={() => setViewStartSec(Math.max(0, a.startSec - 5))}
+                    className="w-full flex items-start gap-2.5 px-4 py-2.5 text-left transition-colors"
                     style={{ borderBottom: i < annotations.length - 1 ? "1px solid var(--border)" : "none" }}
                     onMouseEnter={e => (e.currentTarget.style.background = "var(--page-bg)")}
                     onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
                     <div className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0"
                       style={{ background: a.type === "alert" ? "var(--red)" : a.type === "warning" ? "var(--amber)" : "var(--teal)" }}/>
                     <div className="flex-1 min-w-0">
-                      <div className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>{/* {a.label} */ "-"}</div>
+                      <div className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>{a.label}</div>
                       <div className="flex items-center gap-1.5 mt-0.5">
                         <span className="text-[10px] font-mono" style={{ color: "var(--text-muted)" }}>{a.time}</span>
                         <span className="text-[10px] font-mono px-1 rounded"
                           style={{ background: "var(--blue-light)", color: "var(--blue)" }}>{a.ch}</span>
                       </div>
                     </div>
-                  </div>
+                  </button>
                 ))
               )}
             </div>
@@ -417,6 +485,41 @@ export default function EEGReviewView() {
           )}
         </div>
       </div>
+
+      {/* Electrode scheme reference — real Neurosoft montage manager capture */}
+      {showMontageRef && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-6"
+          style={{ background: "rgba(15,23,42,0.6)" }}
+          onClick={() => setShowMontageRef(false)}
+        >
+          <div
+            className="card overflow-hidden max-w-3xl w-full"
+            style={{ boxShadow: "var(--shadow-md)" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-5 py-3.5" style={{ borderBottom: "1px solid var(--border)" }}>
+              <div>
+                <div className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Pediatric EMG electrode scheme</div>
+                <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>20 derivations · 10-20 system · Neurosoft montage manager</div>
+              </div>
+              <button
+                onClick={() => setShowMontageRef(false)}
+                className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                style={{ color: "var(--text-muted)", border: "1px solid var(--border)" }}
+                aria-label="Close"
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                  <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+            <div className="relative w-full" style={{ background: "var(--page-bg)", aspectRatio: "1365/1131" }}>
+              <Image src="/montage.png" alt="Neurosoft montage manager showing the pediatric EMG electrode scheme" fill className="object-contain" />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

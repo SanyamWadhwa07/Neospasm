@@ -22,7 +22,7 @@ function MiniWave({ color }: { color: string }) {
   );
 }
 
-export default function EventsList() {
+export default function EventsList({ onSelectEvent }: { onSelectEvent?: (sec: number) => void } = {}) {
   const [filter, setFilter] = useState<"ALL" | SpasmType>("ALL");
   const { events, summary, loading, error } = useSpasmData();
 
@@ -56,7 +56,7 @@ export default function EventsList() {
             <button key={f} onClick={() => setFilter(f)}
               className="text-[11px] font-semibold px-2.5 py-1.5 transition-all"
               style={filter === f
-                ? { background: "white", color: "var(--text-primary)", boxShadow: "var(--shadow-xs)" }
+                ? { background: "var(--card-bg)", color: "var(--text-primary)", boxShadow: "var(--shadow-xs)" }
                 : { background: "transparent", color: "var(--text-muted)" }
               }>
               {f}
@@ -65,13 +65,14 @@ export default function EventsList() {
         </div>
       </div>
 
-      <div>
+      <div className="overflow-y-auto" style={{ maxHeight: 420 }}>
         {filtered.map((ev: SpasmEvent, i: number) => {
           const { color, bgColor, borderColor } = eventColors(ev.type);
           const side = ev.laterality === "BILATERAL" ? "B" : (ev.laterality ?? "—");
 
           return (
             <button key={ev.id}
+              onClick={() => onSelectEvent?.(ev.startSec)}
               className="w-full flex items-center gap-4 px-5 py-3.5 text-left transition-colors group"
               style={{ borderBottom: i < filtered.length - 1 ? "1px solid var(--border)" : "none" }}
               onMouseEnter={e => (e.currentTarget.style.background = "var(--page-bg)")}
@@ -98,17 +99,17 @@ export default function EventsList() {
                   </span>
                   <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded-md"
                     style={{ background: bgColor, color, border: `1px solid ${borderColor}` }}>
-                    {/* {ev.type} */ "-"}
+                    {ev.type}
                   </span>
                   {side !== "—" && (
                     <span className="text-xs font-mono font-semibold px-1.5 py-0.5 rounded"
                       style={{ background: "var(--page-bg)", color: "var(--text-muted)", border: "1px solid var(--border)" }}>
-                      {/* {side} */ "-"}
+                      {side}
                     </span>
                   )}
                 </div>
                 <div className="text-xs mt-0.5 truncate" style={{ color: "var(--text-muted)" }}>
-                  {ev.durationSec}s · {/* {ev.description} */ "-"}
+                  {ev.durationSec}s · {ev.description}
                 </div>
               </div>
 

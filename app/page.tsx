@@ -15,37 +15,29 @@ import EventsView from "@/components/views/EventsView";
 import ReportsView from "@/components/views/ReportsView";
 import TrendsView from "@/components/views/TrendsView";
 import AlertConfigView from "@/components/views/AlertConfigView";
+import DocsView from "@/components/views/DocsView";
 
-export type NavId = "dashboard" | "patients" | "eeg" | "events" | "reports" | "trends" | "alerts";
+export type NavId = "dashboard" | "patients" | "eeg" | "events" | "reports" | "trends" | "alerts" | "docs";
 
-function DashboardView() {
+function DashboardView({ onSeekEeg }: { onSeekEeg: (sec: number) => void }) {
   return (
     <div className="px-4 pt-6 pb-4 md:px-10 md:pt-8 md:pb-6 space-y-4 max-w-[1400px]">
       <PatientCard />
 
-      {/* Main grid: clinical data left, live monitoring right */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        {/* Left column: alert + severity + burden */}
-        <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="sm:col-span-2">
-            <SpasmAlert />
+      {/* Two independent stacks, each sized by its own content: left carries
+          the alert banner, IESS/burden row, and events list; right carries
+          live monitoring and the phenotype card. */}
+      <div className="dashboard-bento">
+        <div className="area-left">
+          <SpasmAlert onReview={onSeekEeg} />
+          <div className="area-split">
+            <IESSSeverity />
+            <SpasmBurden />
           </div>
-          <IESSSeverity />
-          <SpasmBurden />
+          <EventsList onSelectEvent={onSeekEeg} />
         </div>
-
-        {/* Right column: live monitoring (full height) */}
-        <div className="lg:col-span-4">
+        <div className="area-right">
           <LiveMonitoring />
-        </div>
-      </div>
-
-      {/* Bottom row: events + phenotype */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        <div className="lg:col-span-8">
-          <EventsList />
-        </div>
-        <div className="lg:col-span-4">
           <PhenotypeAnalysis />
         </div>
       </div>
@@ -56,6 +48,15 @@ function DashboardView() {
 export default function Dashboard() {
   const [activeView, setActiveView] = useState<NavId>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  // Set when an event row (dashboard, event log, or the alert banner) is
+  // clicked — jumps to EEG Review and seeks the waveform to that event's
+  // real time window, so "view this spasm's EEG" is an actual working action.
+  const [eegSeekSec, setEegSeekSec] = useState<number | null>(null);
+
+  function goToEegAt(sec: number) {
+    setEegSeekSec(sec);
+    setActiveView("eeg");
+  }
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: "var(--page-bg)" }}>
@@ -82,13 +83,14 @@ export default function Dashboard() {
         />
 
         <div className="flex-1 overflow-y-auto">
-          {activeView === "dashboard" && <DashboardView />}
+          {activeView === "dashboard" && <DashboardView onSeekEeg={goToEegAt} />}
           {activeView === "patients"  && <PatientsView />}
-          {activeView === "eeg"       && <EEGReviewView />}
-          {activeView === "events"    && <EventsView />}
+          {activeView === "eeg"       && <EEGReviewView initialSeekSec={eegSeekSec} />}
+          {activeView === "events"    && <EventsView onSelectEvent={goToEegAt} />}
           {activeView === "reports"   && <ReportsView />}
           {activeView === "trends"    && <TrendsView />}
           {activeView === "alerts"    && <AlertConfigView />}
+          {activeView === "docs"      && <DocsView />}
         </div>
       </div>
     </div>

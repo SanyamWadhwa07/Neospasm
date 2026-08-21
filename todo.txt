@@ -1,0 +1,34 @@
+NeoSpasm - session todo.txt
+Color palette (globals.css tokens) is not being changed. D:\Infantile is source of truth for real data.
+
+DONE
+- PDF report: fixed text overflowing page/box edges (ReportsView.tsx)
+- Doctor names replaced everywhere: Dr. K. Arora -> Dr. Jitendra Kumar Sahu, Dr. P. Shah -> Dr. Priyanka Madaan
+- Installed design skills: impeccable, design-taste-frontend, Emil Kowalski animation set
+- Live monitoring video: face blurred for privacy (static region, whole 15s clip). Original unblurred file kept only in session scratchpad, not in public/
+- EEG channels relabeled to the real bipolar montage (FP2-C4, C4-O2, ... FZ-CZ, CZ-PZ) with hemisphere colors (red=right, teal=left, blue=midline), matching the real Neurosoft montage screenshot
+- Copied real montage.png (electrode scheme) from D:\Infantile\Mid Eval\Neuroft Visualisation of Data into public/, added "Electrode scheme" viewer button on EEG Review page
+- LiveMonitoring: removed meaningless "Motion Energy"/"Pose Asymmetry" fake tiles, replaced with real EEG channel count, real recording duration, real frame rate; fixed wrong "19 channels" fallback to the real 50; wired confidence bar + heading to real data
+- Restored PhenotypeAnalysis.tsx (was blanked to "-") using real event data via useSpasmData(), illustrative fallback only for the pre-load edge case
+- Restored all other blanked "-" placeholders with real data: SpasmAlert, SpasmBurden, EventsList, EventsView, TrendsView
+- Built dashboard bento grid layout (globals.css .dashboard-bento + app/page.tsx) - alert banner, tall live-monitoring hero, IESS weighted larger than burden chart, wide events list, phenotype corner. Stacks in priority order on mobile.
+- Found and fixed root cause of "layout looks broken/unstyled" - two stale orphaned dev server processes were squatting on ports 3000/3001 serving a broken build. Killed them, cleared .next cache, restarted clean on port 3000.
+- tsc --noEmit and next build both pass clean
+
+DONE (this session)
+- Root-caused "EEG channel is wrong": of the 50 .nscurve file slots, 36 are allocated-but-never-recorded (all-zero) and were being counted/played back as real channels anyway (byte-length check only, no content check). lib/nspack-reader.ts now has hasSignal() — a real channel must have a non-trivial fraction of nonzero samples. True channel count is 14, not 50. getEegChannelCount()/listEegCurves() both use this now, so every "N channels" badge in the UI (Live Monitoring tile, EEG Review header + channel-selector count) reflects reality.
+- Fixed the nscurve->Float32Array byte/element-count bug the above fix exposed (Invalid typed array length) in hasSignal().
+- Fixed "EEG events not sync": EEGWaveform previously always fetched /api/eeg?start=0 (ignoring whatever event/time was referenced elsewhere on screen) and started playback at a *random* cursor offset. Now takes a startSec prop: LiveMonitoring windows the trace around the actual last alert event (with a caption showing which event/time it's displaying), EEG Review's timeline scrubber dot/markers/annotations are clickable and seek the waveform to that real event's window, and playback always starts at true window t=0 (no more random offset).
+- Fixed a second sync bug: when more montage channels were requested than real curves exist (e.g. all 18 bipolar derivations in EEG Review vs. 14 real curves), EEGWaveform silently reused one real curve's trace under multiple different channel labels (modulo wrap). Now falls back to a synthesized-but-plausible trace per user instruction ("if data is present show true data, if missing dummy-but-realistic is fine") instead of mislabeling duplicated real data.
+- Removed double elevation (border+shadow) on .card -> border only.
+- Removed banned colored left-strip accents on PatientCard.tsx and SpasmAlert.tsx.
+- Simplified Sidebar active-nav-item indicator (dropped the redundant left border, background+text color carry it).
+- Verified via tsc --noEmit, next build, and live curl checks against /api/eeg and /api/spasms/summary on the running dev server.
+
+NOT STARTED
+- [ ] Confirm the above renders correctly via an actual browser screenshot — no headless browser tool (chromium-cli/playwright/puppeteer) was available in this environment to capture one; verified via API/data checks instead. User has the dev server open live in-browser.
+- [ ] Visual QA pass across all views at desktop + mobile widths using the 3 installed design skills (impeccable / design-taste-frontend / emil-design-eng)
+- [ ] Run node .agents/skills/impeccable/scripts/detect.mjs --json mechanical scan over changed files
+- [ ] /humanizer pass on on-page copy: PDF executive-summary paragraphs + IESS interpretation strings (lib/spasm-data.ts), notification text, alert config copy
+- [ ] Final cross-view check: Dashboard, Patients, EEG Review, Events, Reports, Trends, Alert Config
+- [ ] Power Spectrum band percentages in EEGReviewView.tsx are still hardcoded (48/22/15/10/5%) — labeled honestly as a fallback in a comment, but not computed from real data; would need an FFT over the real curve samples to fix properly

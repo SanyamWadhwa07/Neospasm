@@ -6,10 +6,10 @@ import type { SpasmEvent } from "@/types/spasm";
 
 const reports = [
   { id: "RPT-2022-0113-01", title: "Daily Clinical Summary",    patient: "B/O Amandeep Kaur", date: "Jan 13 · 06:04", status: "Ready",    pages: 4,  format: "PDF", author: "Auto-generated" },
-  { id: "RPT-2022-0113-02", title: "Seizure Burden Report",     patient: "B/O Amandeep Kaur", date: "Jan 13 · 08:00", status: "Ready",    pages: 6,  format: "PDF", author: "Dr. K. Arora" },
+  { id: "RPT-2022-0113-02", title: "Seizure Burden Report",     patient: "B/O Amandeep Kaur", date: "Jan 13 · 08:00", status: "Ready",    pages: 6,  format: "PDF", author: "Dr. Jitendra Kumar Sahu" },
   { id: "RPT-2022-0113-03", title: "EEG Phenotype Analysis",    patient: "B/O Amandeep Kaur", date: "Jan 13 · 10:00", status: "Ready",    pages: 3,  format: "PDF", author: "Auto-generated" },
-  { id: "RPT-2022-0113-04", title: "Weekly Trend Summary",      patient: "B/O Amandeep Kaur", date: "Jan 13 · 12:00", status: "Ready",    pages: 8,  format: "PDF", author: "Dr. K. Arora" },
-  { id: "RPT-2022-0112-01", title: "Medication Response Log",   patient: "B/O Amandeep Kaur", date: "Jan 12 · 14:00", status: "Archived", pages: 5,  format: "PDF", author: "Dr. P. Shah" },
+  { id: "RPT-2022-0113-04", title: "Weekly Trend Summary",      patient: "B/O Amandeep Kaur", date: "Jan 13 · 12:00", status: "Ready",    pages: 8,  format: "PDF", author: "Dr. Jitendra Kumar Sahu" },
+  { id: "RPT-2022-0112-01", title: "Medication Response Log",   patient: "B/O Amandeep Kaur", date: "Jan 12 · 14:00", status: "Archived", pages: 5,  format: "PDF", author: "Dr. Priyanka Madaan" },
   { id: "RPT-2022-0111-01", title: "Admission Baseline EEG",    patient: "B/O Amandeep Kaur", date: "Jan 11 · 09:00", status: "Archived", pages: 10, format: "PDF", author: "Auto-generated" },
 ];
 
@@ -23,7 +23,7 @@ const sections = [
 ];
 
 const meds = [
-  { name: "ACTH",       dose: "40 IU/m²/day",  start: "Day 1", response: "Partial — 32% reduction", status: "Active" },
+  { name: "ACTH",       dose: "40 IU/m²/day",  start: "Day 1", response: "Partial (32% reduction)", status: "Active" },
   { name: "Vigabatrin", dose: "100 mg/kg/day",  start: "Day 2", response: "Augmentation ongoing",    status: "Active" },
   { name: "Pyridoxine", dose: "100 mg/day",     start: "Day 1", response: "No isolated response",    status: "Discontinued" },
 ];
@@ -65,6 +65,19 @@ function generatePDF(
   const setDraw      = (c: [number,number,number]) => doc.setDrawColor(c[0], c[1], c[2]);
   const setTextColor = (c: [number,number,number]) => doc.setTextColor(c[0], c[1], c[2]);
 
+  // Truncates to fit maxWidth (mm) under the currently-set font, unlike a fixed
+  // character-count slice which overflows once glyphs run wider than expected.
+  function truncateToWidth(text: string, maxWidth: number): string {
+    if (doc.getTextWidth(text) <= maxWidth) return text;
+    let lo = 0, hi = text.length;
+    while (lo < hi) {
+      const mid = Math.ceil((lo + hi) / 2);
+      const candidate = text.slice(0, mid) + "…";
+      if (doc.getTextWidth(candidate) <= maxWidth) lo = mid; else hi = mid - 1;
+    }
+    return text.slice(0, lo) + "…";
+  }
+
   // Header bar
   setFill(colors.navy);
   doc.rect(0, 0, W, 28, "F");
@@ -93,21 +106,22 @@ function generatePDF(
   y = 36;
 
   // Patient strip — real data
+  const stripH = 24;
   setFill(colors.light);
   setDraw(colors.border);
   doc.setLineWidth(0.3);
-  doc.roundedRect(margin, y, contentW, 20, 2, 2, "FD");
+  doc.roundedRect(margin, y, contentW, stripH, 2, 2, "FD");
   setFill(colors.red);
-  doc.roundedRect(margin, y, 3, 20, 1, 1, "F");
+  doc.roundedRect(margin, y, 3, stripH, 1, 1, "F");
 
   setTextColor(colors.text);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
-  doc.text(patientName, margin + 8, y + 7.5);
+  doc.text(truncateToWidth(patientName, 50), margin + 8, y + 8);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7.5);
   setTextColor(colors.gray);
-  doc.text(`Female · 6 months · West Syndrome (IESS)`, margin + 8, y + 13);
+  doc.text(`Female · 6 months · West Syndrome (IESS)`, margin + 8, y + 14);
 
   const infoCols = [
     { label: "MRN",             val: patientId },
@@ -118,9 +132,11 @@ function generatePDF(
     { label: "Ward",            val: "PICU · 3B-04" },
   ];
   const colW = (contentW - 60) / 3;
+  // Two label+value rows, spaced far enough apart that row 1's value and row
+  // 2's label don't crowd each other (they used to sit ~2mm apart).
   infoCols.forEach((col, i) => {
     const cx = margin + 60 + (i % 3) * colW;
-    const cy = y + (i < 3 ? 7 : 14);
+    const cy = y + (i < 3 ? 7 : 17);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(6.5);
     setTextColor(colors.gray);
@@ -128,10 +144,10 @@ function generatePDF(
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
     setTextColor(colors.text);
-    doc.text(col.val, cx, cy + 3.5);
+    doc.text(truncateToWidth(col.val, colW - 3), cx, cy + 3.5);
   });
 
-  y += 28;
+  y += stripH + 8;
 
   // IESS banner — real score
   setFill(colors.red);
@@ -144,7 +160,8 @@ function generatePDF(
   doc.text(`${iessScore} / 10`, margin + 5, y + 12);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
-  doc.text(`${totalSpasms} spasms  ·  Burden ${burden}%  ·  ${iessInterp.slice(0, 60)}…`, margin + 42, y + 12);
+  const interpFull = `${totalSpasms} spasms  ·  Burden ${burden}%  ·  ${iessInterp}`;
+  doc.text(truncateToWidth(interpFull, contentW - 42 - 3), margin + 42, y + 12);
   y += 22;
 
   function sectionHeader(title: string) {
@@ -172,16 +189,19 @@ function generatePDF(
 
     const summaryText = [
       `${patientName} is a 6-month-old female admitted on Day 3 with infantile epileptic spasm syndrome (IESS). The IESS severity score is ${iessScore}/10, with ${totalSpasms} spasms recorded in this EEG session (${burden}% recording burden).`,
-      `${clusterCount} cluster-type and ${focalCount} focal spasms were detected. The predominant phenotype is right-frontal with concordant EEG focality. Average inter-spasm interval was ${events.length > 1 ? events[1].interSpasmInterval ?? "—" : "—"}s, indicating rapid succession.`,
+      `${clusterCount} cluster-type and ${focalCount} focal spasms were detected. The predominant phenotype is right-frontal with concordant EEG focality. Average inter-spasm interval was ${events.length > 1 ? events[1].interSpasmInterval ?? "—" : "—"}s; these spasms recurred in rapid succession.`,
       `Current treatment with ACTH and Vigabatrin has produced a partial 32% reduction in event frequency. Continued monitoring and possible dose adjustment are recommended. ${iessInterp}`,
     ];
 
     summaryText.forEach(para => {
       checkPage(20);
-      const lines = doc.splitTextToSize(para, contentW);
+      // Font must be set BEFORE splitTextToSize — it wraps using whatever
+      // font/size is currently active, so measuring at one size and then
+      // drawing at another lets the widest lines run past contentW.
       setTextColor(colors.text);
       doc.setFont("helvetica", "normal");
       doc.setFontSize(8.5);
+      const lines = doc.splitTextToSize(para, contentW);
       doc.text(lines, margin, y);
       y += lines.length * 4.5 + 4;
     });
@@ -255,7 +275,7 @@ function generatePDF(
       const side = ev.laterality === "BILATERAL" ? "Both" : (ev.laterality ?? "—");
       doc.text(side, margin + 38, y + 4.5);
       doc.text(`${ev.durationSec}s`, margin + 50, y + 4.5);
-      doc.text(ev.description.slice(0, 45), margin + 64, y + 4.5);
+      doc.text(truncateToWidth(ev.description, 80), margin + 64, y + 4.5);
       setTextColor(typeColor);
       doc.setFont("helvetica", "bold");
       doc.text(`${ev.fusionConfidencePct}%`, margin + 148, y + 4.5);
@@ -300,7 +320,7 @@ function generatePDF(
       doc.text(`Dose: ${m.dose}  ·  Started: ${m.start}`, margin + 5, y + 13);
       setTextColor(colors.text);
       doc.setFontSize(8);
-      doc.text(`Response: ${m.response}`, margin + 5, y + 17);
+      doc.text(truncateToWidth(`Response: ${m.response}`, contentW - 10), margin + 5, y + 17);
       y += 22;
     });
   }
@@ -314,7 +334,7 @@ function generatePDF(
     setTextColor(colors.white);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(6.5);
-    doc.text("NeoSpasm Clinical Monitor — CONFIDENTIAL — For authorised clinical use only", margin, 293);
+    doc.text("NeoSpasm Clinical Monitor  |  CONFIDENTIAL  |  For authorised clinical use only", margin, 293);
     doc.text(`Page ${i} of ${pageCount}`, W - margin, 293, { align: "right" });
   }
 
@@ -349,7 +369,7 @@ export default function ReportsView() {
         summary?.spasmBurdenPercent   ?? 3.05,
         summary?.severity?.score      ?? 5.5,
         summary?.severity?.interpretation ?? "Moderate spasm burden.",
-        summary?.patient?.clinician   ?? "Dr. K. Arora",
+        summary?.patient?.clinician   ?? "Dr. Jitendra Kumar Sahu",
         summary?.exam?.date           ?? "2022-01-13T06:04:24Z",
         summary?.exam?.eegChannels    ?? 50,
         events,
@@ -395,7 +415,7 @@ export default function ReportsView() {
                   <button key={p} onClick={() => setPeriod(p)}
                     className="flex-1 text-[11px] font-semibold py-2 transition-all"
                     style={p === period
-                      ? { background: "white", color: "var(--blue)", boxShadow: "var(--shadow-xs)" }
+                      ? { background: "var(--card-bg)", color: "var(--blue)", boxShadow: "var(--shadow-xs)" }
                       : { background: "transparent", color: "var(--text-muted)" }}>
                     {p}
                   </button>

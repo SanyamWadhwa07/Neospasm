@@ -1,21 +1,6 @@
 "use client";
-import { useState, useEffect } from "react";
-
-/* ─── Original implementation (disabled) ─────────────────────────────────────
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-interface SpasmEvent {
-  id: number;
-  type: "FOCAL" | "CLUSTER" | "DIFFUSE";
-  laterality: "R" | "L" | "BILATERAL" | null;
-  description: string;
-  fusionConfidencePct: number;
-}
-
-interface ApiData {
-  events: SpasmEvent[];
-}
+import { useSpasmData } from "@/lib/use-spasm-data";
+import type { Laterality } from "@/types/spasm";
 
 // ─── Electrode layout ─────────────────────────────────────────────────────────
 
@@ -59,7 +44,7 @@ const FOCUS_ELLIPSE: Record<string, { cx: number; cy: number; rx: number; ry: nu
 
 // ─── Brain map ────────────────────────────────────────────────────────────────
 
-function BrainMap({ laterality, asymmetryPct }: { laterality: string | null; asymmetryPct: number }) {
+function BrainMap({ laterality, asymmetryPct }: { laterality: Laterality; asymmetryPct: number }) {
   const activeIds = ACTIVE_MAP[laterality ?? "null"] ?? [];
   const ellipse   = FOCUS_ELLIPSE[laterality ?? "null"];
   const label     = laterality === "BILATERAL" ? "L = R" : laterality === "R" ? "R > L" : laterality === "L" ? "L > R" : "Diffuse";
@@ -67,7 +52,7 @@ function BrainMap({ laterality, asymmetryPct }: { laterality: string | null; asy
   return (
     <div className="rounded-xl p-3" style={{ background: "var(--page-bg)", border: "1px solid var(--border)" }}>
       <svg viewBox="0 0 150 148" className="w-full h-28">
-        <ellipse cx="75" cy="72" rx="54" ry="60" fill="white" stroke="var(--border-strong)" strokeWidth="1"/>
+        <ellipse cx="75" cy="72" rx="54" ry="60" style={{ fill: "var(--card-bg)" }} stroke="var(--border-strong)" strokeWidth="1"/>
         {ellipse && (
           <ellipse cx={ellipse.cx} cy={ellipse.cy} rx={ellipse.rx} ry={ellipse.ry}
             fill="rgba(217,48,37,0.08)" stroke="rgba(217,48,37,0.2)" strokeWidth="0.5"/>
@@ -95,7 +80,7 @@ function BrainMap({ laterality, asymmetryPct }: { laterality: string | null; asy
 
 // ─── Body diagram ─────────────────────────────────────────────────────────────
 
-function BodyDiagram({ laterality, aiScore }: { laterality: string | null; aiScore: number }) {
+function BodyDiagram({ laterality, aiScore }: { laterality: Laterality; aiScore: number }) {
   const rightActive = laterality === "R" || laterality === "BILATERAL";
   const leftActive  = laterality === "L" || laterality === "BILATERAL";
   const label       = laterality === "BILATERAL" ? "Bilateral" : laterality === "R" ? "R > L" : laterality === "L" ? "L > R" : "Symmetric";
@@ -127,34 +112,25 @@ function BodyDiagram({ laterality, aiScore }: { laterality: string | null; aiSco
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-function PhenotypeAnalysisOriginal() {
-  const [data, setData]       = useState<ApiData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError]     = useState<string | null>(null);
-
-  useEffect(() => {
-    fetch("/api/spasms")
-      .then(r => { if (!r.ok) throw new Error(`API ${r.status}`); return r.json(); })
-      .then((json: ApiData) => { setData(json); setLoading(false); })
-      .catch((err: Error)   => { setError(err.message); setLoading(false); });
-  }, []);
+export default function PhenotypeAnalysis() {
+  const { events, loading, error } = useSpasmData();
 
   // Use last event as "current" phenotype (most recent is highest id)
-  const lastEvent = data?.events[data.events.length - 1] ?? null;
+  const lastEvent  = events[events.length - 1] ?? null;
   const laterality = lastEvent?.laterality ?? null;
   const spasmType  = lastEvent?.type ?? "FOCAL";
 
   // Derived stats from all events
-  const totalEvents = data?.events.length ?? 0;
-  const rightCount  = data?.events.filter(e => e.laterality === "R").length ?? 0;
-  const leftCount   = data?.events.filter(e => e.laterality === "L").length ?? 0;
+  const totalEvents = events.length;
+  const rightCount  = events.filter(e => e.laterality === "R").length;
+  const leftCount   = events.filter(e => e.laterality === "L").length;
   const asymmetryPct = totalEvents > 0
     ? Math.round(Math.abs(rightCount - leftCount) / totalEvents * 100)
-    : 38;
+    : 38; // illustrative default while events are still loading
 
-  const avgConfidence = data?.events.length
-    ? Math.round(data.events.reduce((s, e) => s + e.fusionConfidencePct, 0) / data.events.length) / 100
-    : 0.61;
+  const avgConfidence = events.length
+    ? Math.round(events.reduce((s, e) => s + e.fusionConfidencePct, 0) / events.length) / 100
+    : 0.61; // illustrative default while events are still loading
 
   // Concordance: EEG laterality matches motor laterality
   const isConcordant = laterality !== null && laterality !== "BILATERAL";
@@ -233,49 +209,6 @@ function PhenotypeAnalysisOriginal() {
             {isConcordant ? "Concordant modalities." : "Bilateral pattern."}
           </span>{" "}
           {concordantText}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-──────────────────────────────────────────────────────────────────────────── */
-
-export default function PhenotypeAnalysis() {
-  return (
-    <div className="card p-5">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <div className="label mb-1">Phenotype Analysis</div>
-          <div className="text-sm" style={{ color: "var(--text-secondary)" }}>
-            -
-          </div>
-        </div>
-        <span className="text-[11px] font-bold px-2.5 py-1 rounded-lg"
-          style={{ background: "var(--blue-light)", color: "var(--blue)", border: "1px solid var(--blue-border)" }}>
-          -
-        </span>
-      </div>
-
-      <div className="grid grid-cols-2 gap-3 mb-3">
-        <div>
-          <div className="label mb-2">EEG Focality</div>
-          <div className="rounded-xl p-3" style={{ background: "var(--page-bg)", border: "1px solid var(--border)" }}>
-            -
-          </div>
-        </div>
-        <div>
-          <div className="label mb-2">Motor Asymmetry</div>
-          <div className="rounded-xl p-3" style={{ background: "var(--page-bg)", border: "1px solid var(--border)" }}>
-            -
-          </div>
-        </div>
-      </div>
-
-      <div className="flex items-start gap-2.5 rounded-lg px-3 py-2.5"
-        style={{ background: "var(--page-bg)", border: "1px solid var(--border)" }}>
-        <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-          -
         </p>
       </div>
     </div>

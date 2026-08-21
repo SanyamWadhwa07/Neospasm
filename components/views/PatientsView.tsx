@@ -32,22 +32,22 @@ export default function PatientsView() {
   const patients = [
     realPatient ?? {
       id: "00482-A", name: "B/O Amandeep Kaur", age: "6 mo", weight: "7.2 kg", sex: "F",
-      day: 3, status: "ALERTING", events: 23, iess: 5.5, clinician: "Dr. K. Arora",
+      day: 3, status: "ALERTING", events: 23, iess: 5.5, clinician: "Dr. Jitendra Kumar Sahu",
       etiology: "Structural (R MCD)", lastEvent: "06:09", ward: "3B-04",
     },
     {
-      id: "00479-B", name: "Baby M.", age: "4 mo", weight: "5.8 kg", sex: "M",
-      day: 7, status: "STABLE", events: 3, iess: 3.1, clinician: "Dr. P. Shah",
+      id: "00479-B", name: "B/O Simran Kaur", age: "4 mo", weight: "5.8 kg", sex: "M",
+      day: 7, status: "STABLE", events: 3, iess: 3.1, clinician: "Dr. Priyanka Madaan",
       etiology: "TSC", lastEvent: "09:41", ward: "3B-02",
     },
     {
-      id: "00476-C", name: "Baby J.", age: "8 mo", weight: "8.4 kg", sex: "F",
-      day: 12, status: "STABLE", events: 0, iess: 1.8, clinician: "Dr. P. Shah",
+      id: "00476-C", name: "B/O Neha Sharma", age: "8 mo", weight: "8.4 kg", sex: "F",
+      day: 12, status: "STABLE", events: 0, iess: 1.8, clinician: "Dr. Priyanka Madaan",
       etiology: "Idiopathic", lastEvent: "Yesterday", ward: "3B-01",
     },
     {
-      id: "00481-D", name: "Baby K.", age: "5 mo", weight: "6.5 kg", sex: "M",
-      day: 1, status: "MONITORING", events: 8, iess: 5.4, clinician: "Dr. K. Arora",
+      id: "00481-D", name: "B/O Ramanpreet Kaur", age: "5 mo", weight: "6.5 kg", sex: "M",
+      day: 1, status: "MONITORING", events: 8, iess: 5.4, clinician: "Dr. Jitendra Kumar Sahu",
       etiology: "DS", lastEvent: "12:55", ward: "3B-06",
     },
   ];
@@ -66,23 +66,16 @@ export default function PatientsView() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-semibold" style={{ color: "var(--text-primary)", letterSpacing: "-0.02em" }}>
-            Ward 3B — Active Patients
+            Ward 3B: Active Patients
           </h1>
           <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>
             4 patients · PICU · {loading ? "Loading…" : `Updated ${new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}`}
           </p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white transition-all"
-          style={{ background: "linear-gradient(135deg, var(--blue), #1D4ED8)", boxShadow: "0 2px 8px rgba(37,99,235,0.3)" }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-            <path d="M12 5v14M5 12h14"/>
-          </svg>
-          Admit Patient
-        </button>
       </div>
 
       {/* Stats strip — real values for first patient */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
           { label: "Active",       value: "4",              sub: "PICU Ward 3B",         color: "var(--blue)" },
           { label: "Alerting",     value: "1",              sub: "Requires attention",   color: "var(--red)" },
@@ -103,7 +96,8 @@ export default function PatientsView() {
           <div className="label">Patient Roster</div>
         </div>
 
-        <table className="w-full">
+        <div className="overflow-x-auto">
+        <table className="w-full" style={{ minWidth: 800 }}>
           <thead>
             <tr style={{ borderBottom: "1px solid var(--border)", background: "var(--page-bg)" }}>
               {["Patient", "Status", "Ward", "IESS", "Events Today", "Last Event", "Clinician", "Day"].map((h) => (
@@ -177,6 +171,7 @@ export default function PatientsView() {
             })}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );

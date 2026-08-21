@@ -195,7 +195,7 @@ export function getSpasmData(): { events: SpasmEvent[]; summary: SpasmSummary } 
     weightKg:       rawPatient.Weight ?? null,
     etiology:       "Structural (R MCD)",
     diagnosis:      rawPatient.Diagnosis ?? "West Syndrome (IESS)",
-    clinician:      rawExam.Doctor || "Dr. K. Arora",
+    clinician:      rawExam.Doctor || "Dr. Jitendra Kumar Sahu",
     examDate:       rawExam.ExamDate,
   };
 
@@ -207,7 +207,7 @@ export function getSpasmData(): { events: SpasmEvent[]; summary: SpasmSummary } 
     samplingRateHz: 256,
     hasVideo:       hasVideo || isVideoPr === 1,
     hasAudio:       hasAudio,
-    doctor:         rawExam.Doctor || "Dr. K. Arora",
+    doctor:         rawExam.Doctor || "Dr. Jitendra Kumar Sahu",
   };
 
   // Build events

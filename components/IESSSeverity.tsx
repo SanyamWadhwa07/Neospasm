@@ -38,7 +38,7 @@ export default function IESSSeverity() {
         {/* Gauge */}
         <div className="relative w-28 h-28 flex-shrink-0">
           <svg width="112" height="112" viewBox="0 0 112 112" className="-rotate-90">
-            <circle cx="56" cy="56" r={radius} fill="none" stroke="var(--page-bg)" strokeWidth="10" />
+            <circle cx="56" cy="56" r={radius} fill="none" stroke="var(--border)" strokeWidth="10" />
             <motion.circle
               cx="56" cy="56" r={radius}
               fill="none"

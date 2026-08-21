@@ -31,13 +31,13 @@ const CustomTooltip = ({ active, payload, label }: {
   if (!active || !payload?.length) return null;
   return (
     <div className="rounded-lg px-3 py-2"
-      style={{ background: "white", border: "1px solid var(--border)", boxShadow: "var(--shadow-md)" }}>
+      style={{ background: "var(--card-bg)", border: "1px solid var(--border)", boxShadow: "var(--shadow-md)" }}>
       <div className="text-xs font-semibold mb-1" style={{ color: "var(--text-secondary)" }}>{label}</div>
       {payload.map(p => (
         <div key={p.name} className="text-xs flex items-center gap-2">
           <span className="font-semibold" style={{ color: "var(--text-primary)" }}>{p.value}</span>
           <span style={{ color: "var(--text-muted)", textTransform: "capitalize" }}>
-            {p.name === "focal" || p.name === "diffuse" ? "-" : p.name}
+            {p.name}
           </span>
         </div>
       ))}

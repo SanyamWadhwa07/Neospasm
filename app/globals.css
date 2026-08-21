@@ -6,6 +6,7 @@
   --sidebar-border: rgba(255,255,255,0.06);
   --card-bg: #FFFFFF;
   --page-bg: #F9FAFB;
+  --topbar-bg: rgba(242,244,248,0.95);
   --border: #E5E7EB;
   --border-strong: #D1D5DB;
 
@@ -40,6 +41,47 @@
 
   --font-ui: 'DM Sans', system-ui, sans-serif;
   --font-mono: 'IBM Plex Mono', monospace;
+
+  color-scheme: light;
+}
+
+/* Dark mode — same token names, dark values. Applied via [data-theme="dark"]
+   (set by the toggle in TopBar, persisted to localStorage) rather than only
+   prefers-color-scheme, so clinicians get explicit manual control. The light
+   :root block above is untouched. */
+:root[data-theme="dark"] {
+  --card-bg: #131A27;
+  --page-bg: #0B0F17;
+  --topbar-bg: rgba(11,15,23,0.85);
+  --border: #232B3A;
+  --border-strong: #344054;
+
+  --text-primary: #EEF1F6;
+  --text-secondary: #A3ADC2;
+  --text-muted: #6B7690;
+
+  --red: #F0524C;
+  --red-light: rgba(240,82,76,0.14);
+  --red-border: rgba(240,82,76,0.35);
+
+  --blue: #5B93F5;
+  --blue-light: rgba(91,147,245,0.14);
+  --blue-border: rgba(91,147,245,0.35);
+
+  --teal: #2DD4B6;
+  --teal-light: rgba(45,212,182,0.13);
+  --teal-border: rgba(45,212,182,0.32);
+
+  --amber: #F0A93C;
+  --amber-light: rgba(240,169,60,0.14);
+  --amber-border: rgba(240,169,60,0.32);
+
+  --shadow-xs:  0 1px 2px rgba(0,0,0,0.4);
+  --shadow-sm:  0 1px 3px rgba(0,0,0,0.5), 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md:  0 4px 10px rgba(0,0,0,0.45), 0 10px 20px rgba(0,0,0,0.3);
+  --shadow-alert: 0 0 0 1px rgba(240,82,76,0.3), 0 4px 16px rgba(240,82,76,0.25);
+
+  color-scheme: dark;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -60,10 +102,7 @@ body {
   background: var(--card-bg);
   border-radius: var(--radius);
   border: 1px solid var(--border);
-  box-shadow: var(--shadow-sm);
 }
-
-/* Sidebar active nav item uses a blue accent that matches --blue */
 
 .label {
   font-size: 10px;
@@ -82,21 +121,49 @@ body {
   letter-spacing: -0.02em;
 }
 
-@keyframes pulse-dot {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(0.85); }
-}
 @keyframes fade-up {
   from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-.animate-pulse-dot { animation: pulse-dot 1.6s ease-in-out infinite; }
 .animate-fade-up { animation: fade-up 0.4s ease both; }
 
 .sidebar-texture {
   background-image: radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px);
   background-size: 20px 20px;
+}
+
+/* Dashboard bento grid — mobile stacks in DOM (priority) order. Desktop splits
+   into two independent vertical stacks (left: alert + IESS/burden + events,
+   right: live monitoring + phenotype) rather than spanning shared grid rows —
+   spanning rows previously forced Live Monitoring's real height to line up
+   with two unrelated cards' combined height, leaving empty space whenever it
+   didn't match. Each column now sizes purely from its own content. */
+.dashboard-bento {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+@media (min-width: 1024px) {
+  .dashboard-bento {
+    grid-template-columns: 2fr 1fr;
+    align-items: start;
+  }
+}
+.dashboard-bento > .area-left,
+.dashboard-bento > .area-right {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}
+.dashboard-bento > .area-left > .area-split {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+@media (min-width: 640px) {
+  .dashboard-bento > .area-left > .area-split { grid-template-columns: 5fr 3fr; }
 }
 
 ::-webkit-scrollbar { width: 4px; height: 4px; }

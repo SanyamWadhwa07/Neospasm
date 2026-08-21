@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import EEGWaveform from "./EEGWaveform";
+import { useSpasmData } from "@/lib/use-spasm-data";
 
 function MetricTile({ label, value, unit, accent }: { label: string; value: string; unit: string; accent?: string }) {
   return (
@@ -19,6 +20,23 @@ function MetricTile({ label, value, unit, accent }: { label: string; value: stri
 export default function LiveMonitoring() {
   const [paused, setPaused] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const feedRef = useRef<HTMLDivElement>(null);
+  const { events, summary } = useSpasmData();
+
+  function handleFullscreen() {
+    feedRef.current?.requestFullscreen().catch(() => {});
+  }
+
+  // 50 real .nscurve channel files in the recording (see getEegChannelCount) — used only
+  // as the loading-state fallback before summary.exam.eegChannels resolves from the API.
+  const channelCount = summary?.exam?.eegChannels ?? 50;
+  const lastEvent = events[events.length - 1];
+  const confidencePct = lastEvent?.fusionConfidencePct ?? 0;
+  // A few seconds of lead-in before the event onset, like a real reviewer would scroll back to.
+  const eegWindowStartSec = lastEvent ? Math.max(0, lastEvent.startSec - 5) : 0;
+  const durationLabel = summary
+    ? `${Math.floor(summary.exam.durationSec / 60)}:${String(Math.round(summary.exam.durationSec % 60)).padStart(2, "0")}`
+    : "—";
 
   useEffect(() => {
     const el = videoRef.current;
@@ -34,12 +52,8 @@ export default function LiveMonitoring() {
         style={{ borderBottom: "1px solid var(--border)" }}>
         <div className="flex items-center gap-2.5">
           <span className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>Live Monitoring</span>
-          <span className="flex items-center gap-1.5 text-[11px] font-semibold px-2 py-0.5 rounded-md"
+          <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md"
             style={{ background: "rgba(217,48,37,0.08)", color: "var(--red)", border: "1px solid rgba(217,48,37,0.15)" }}>
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ background: "var(--red)" }} />
-              <span className="relative inline-flex rounded-full h-1.5 w-1.5" style={{ background: "var(--red)" }} />
-            </span>
             Streaming
           </span>
         </div>
@@ -52,17 +66,11 @@ export default function LiveMonitoring() {
               : <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
             }
           </button>
-          <button className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors"
-            style={{ background: "var(--page-bg)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/>
-            </svg>
-          </button>
         </div>
       </div>
 
       {/* Camera feed */}
-      <div className="relative" style={{ background: "#060D1A", aspectRatio: "16/9" }}>
+      <div ref={feedRef} className="relative" style={{ background: "#060D1A", aspectRatio: "16/9" }}>
         {/* Video */}
         <video
           ref={videoRef}
@@ -97,10 +105,6 @@ export default function LiveMonitoring() {
         {/* Top overlays */}
         <div className="absolute top-2.5 left-3 flex items-center gap-1.5 text-[10px] font-mono font-medium text-white/60"
           style={{ background: "rgba(0,0,0,0.45)", padding: "3px 8px", borderRadius: 4 }}>
-          <span className="relative flex h-1.5 w-1.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 bg-red-500" />
-            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500" />
-          </span>
           LIVE · CAM-01
         </div>
 
@@ -109,7 +113,8 @@ export default function LiveMonitoring() {
         </div>
 
         {/* Fullscreen */}
-        <button className="absolute top-2.5 right-3 w-6 h-6 flex items-center justify-center text-white/40 hover:text-white/80 transition-colors"
+        <button onClick={handleFullscreen}
+          className="absolute top-2.5 right-3 w-6 h-6 flex items-center justify-center text-white/40 hover:text-white/80 transition-colors"
           style={{ background: "rgba(0,0,0,0.4)", borderRadius: 4 }}>
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
             <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
@@ -117,11 +122,11 @@ export default function LiveMonitoring() {
         </button>
       </div>
 
-      {/* Metrics */}
+      {/* Metrics — real values only, no unbacked pose/motion scores */}
       <div className="flex gap-2 p-3" style={{ background: "#080F1C" }}>
-        <MetricTile label="Motion Energy" value="0.82" unit="rel" accent="#FF7070" />
-        <MetricTile label={/* "Pose Asymmetry" */ "-"} value={/* "0.61" */ "-"} unit={/* "idx" */ "-"} accent="#FACC15" />
-        <MetricTile label="Frame Rate" value="25" unit="Hz" />
+        <MetricTile label="EEG Channels" value={String(channelCount)} unit="ch" />
+        <MetricTile label="Recording" value={durationLabel} unit="mm:ss" />
+        <MetricTile label="Frame Rate" value="25" unit="fps" />
       </div>
 
       {/* EEG */}
@@ -131,11 +136,13 @@ export default function LiveMonitoring() {
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" strokeWidth="2" strokeLinecap="round">
               <path d="M3 12 Q5 5 8 12 Q11 19 14 12 Q17 5 21 12"/>
             </svg>
-            <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>EEG · 19 channels</span>
+            <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>EEG · {channelCount} channels</span>
           </div>
-          <span className="text-[11px] font-mono" style={{ color: "var(--text-muted)" }}>256 Hz · μV</span>
+          <span className="text-[11px] font-mono" style={{ color: "var(--text-muted)" }}>
+            {lastEvent ? `${lastEvent.wallClockTime} · Event #${lastEvent.id}` : "256 Hz · μV"}
+          </span>
         </div>
-        {!paused ? <EEGWaveform /> : (
+        {!paused ? <EEGWaveform startSec={eegWindowStartSec} /> : (
           <div className="h-20 flex items-center justify-center text-sm" style={{ color: "var(--text-muted)" }}>Paused</div>
         )}
       </div>
@@ -143,14 +150,14 @@ export default function LiveMonitoring() {
       {/* Fusion bar */}
       <div className="px-4 pt-2 pb-4">
         <div className="flex items-center justify-between mb-1.5">
-          <span className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>{/* Fusion confidence */ "EEG confidence"}</span>
-          <span className="text-sm font-mono font-semibold" style={{ color: "var(--red)" }}>94.0%</span>
+          <span className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>EEG confidence · last event</span>
+          <span className="text-sm font-mono font-semibold" style={{ color: "var(--red)" }}>{confidencePct.toFixed(1)}%</span>
         </div>
         <div className="relative h-2 rounded-full overflow-visible" style={{ background: "var(--page-bg)", border: "1px solid var(--border)" }}>
           <motion.div className="h-full rounded-full"
             style={{ background: "linear-gradient(to right, #FBBF24, #EF4444)" }}
             initial={{ width: 0 }}
-            animate={{ width: "94%" }}
+            animate={{ width: `${confidencePct}%` }}
             transition={{ duration: 1.1, ease: "easeOut" }} />
           {/* Threshold */}
           <div className="absolute top-1/2 -translate-y-1/2" style={{ left: "70%" }}>

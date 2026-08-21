@@ -201,31 +201,44 @@ export function hasAudioStream(): boolean {
 }
 
 // ─── List available .nscurve channel files ────────────────────────────────────
+// Verified empirically against this repo's bundled dataset: of the 50
+// .nscurve file slots, most are non-empty (byteLength matches the full
+// exam duration) but a large fraction of THOSE are still all-zero — reserved
+// channel slots the Neurosoft system allocated but never actually recorded
+// through. A byte-length check alone counts those as real channels, which is
+// why the UI was showing "50 channels" when only ~14 curves carry an actual
+// signal. hasSignal() does the real check so channel counts and playback data
+// only ever reflect curves that truly have something in them.
 
-function countNscurveInDirectory(dir: string): number {
-  let count = 0;
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
-  for (const entry of entries) {
-    const full = path.join(dir, entry.name);
-    if (entry.isDirectory()) {
-      count += countNscurveInDirectory(full);
-    } else if (entry.name.endsWith(".nscurve")) {
-      count += 1;
+function hasSignal(filePath: string): boolean {
+  const buf = fs.readFileSync(filePath);
+  const arr = new Float32Array(buf.buffer, buf.byteOffset, Math.floor(buf.length / 4));
+  if (arr.length === 0) return false;
+  // Require a non-trivial fraction of nonzero samples so a handful of stray
+  // floats don't get a dead channel counted as "real" — but low enough that a
+  // channel with a genuine brief burst of real activity (common for auxiliary
+  // leads) still counts, since that IS real recorded data.
+  const threshold = Math.max(1, Math.floor(arr.length * 0.005));
+  let nonZero = 0;
+  for (let i = 0; i < arr.length; i++) {
+    if (arr[i] !== 0) {
+      nonZero++;
+      if (nonZero >= threshold) return true;
     }
   }
-  return count;
+  return false;
 }
 
 export function getEegChannelCount(): number {
   const nspackPath = getNspackPath();
 
   if (nspackIsDirectory()) {
-    return countNscurveInDirectory(nspackPath);
+    return listEegCurves().length;
   }
 
   const zip = new AdmZip(nspackPath);
   const entries = zip.getEntries();
-  return entries.filter((e) => e.entryName.endsWith(".nscurve")).length;
+  return entries.filter((e) => e.entryName.endsWith(".nscurve") && e.header.size > 0 && e.header.size % 4 === 0).length;
 }
 
 // ─── EEG curve (.nscurve) reading ─────────────────────────────────────────────
@@ -257,6 +270,7 @@ function findCurveFilesInDirectory(dir: string): CurveFileInfo[] {
       if (!m) continue;
       const byteLength = fs.statSync(full).size;
       if (byteLength === 0 || byteLength % 4 !== 0) continue; // unused channel slot / not a clean float32 array
+      if (!hasSignal(full)) continue; // allocated slot, but recorded nothing — not a real channel
       out.push({ index: Number(m[1]), filePath: full, byteLength, sampleCount: byteLength / 4 });
     }
   };

@@ -1,6 +1,7 @@
 "use client";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
+import { useSpasmData } from "@/lib/use-spasm-data";
 
 function ConfidenceBar({ label, value, color, bg }: { label: string; value: number; color: string; bg: string }) {
   return (
@@ -20,11 +21,28 @@ function ConfidenceBar({ label, value, color, bg }: { label: string; value: numb
   );
 }
 
-export default function SpasmAlert() {
+const LATERALITY_LABEL: Record<string, string> = {
+  R: "Right Frontal",
+  L: "Left Frontal",
+  BILATERAL: "Bilateral",
+};
+
+export default function SpasmAlert({ onReview }: { onReview?: (sec: number) => void } = {}) {
   const [acknowledged, setAcknowledged] = useState(false);
   const [dismissed, setDismissed] = useState(false);
+  const { events, summary } = useSpasmData();
 
   if (dismissed) return null;
+
+  const latestEvent = events[events.length - 1];
+  const eventCluster = summary?.clusters.find(c => latestEvent && c.spasmIds.includes(latestEvent.id));
+  const badgeLabel = latestEvent
+    ? `${latestEvent.type} · ${LATERALITY_LABEL[latestEvent.laterality ?? ""] ?? "Diffuse"}`
+    : "—";
+  const subtitle = latestEvent
+    ? `Event #${latestEvent.id} · ${latestEvent.wallClockTime}${eventCluster ? ` · Cluster of ${eventCluster.count}` : ""}`
+    : "—";
+  const confidencePct = latestEvent?.fusionConfidencePct ?? 0;
 
   return (
     <AnimatePresence>
@@ -37,17 +55,9 @@ export default function SpasmAlert() {
         style={{
           border: "1px solid var(--red-border)",
           boxShadow: "var(--shadow-alert)",
-          background: "linear-gradient(145deg, #FEF2F2 0%, #FFF8F8 100%)",
+          background: "linear-gradient(145deg, var(--red-light), var(--card-bg))",
         }}
       >
-        {/* Animated left border */}
-        <motion.div
-          className="absolute left-0 top-0 bottom-0 w-1"
-          style={{ background: "var(--red)" }}
-          animate={{ opacity: [1, 0.5, 1] }}
-          transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-        />
-
         <div className="pl-4 pr-4 pt-4 pb-4">
           {/* Header row */}
           <div className="flex items-start justify-between mb-3">
@@ -76,11 +86,11 @@ export default function SpasmAlert() {
                   <span className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>Spasm Detected</span>
                   <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md"
                     style={{ background: "rgba(217,48,37,0.12)", color: "var(--red)", border: "1px solid rgba(217,48,37,0.2)" }}>
-                    {/* Focal · Right Frontal */ "-"}
+                    {badgeLabel}
                   </span>
                 </div>
                 <div className="text-xs mt-0.5 font-mono" style={{ color: "var(--text-muted)" }}>
-                  {/* Event #285 · 7s ago · Cluster of 4 */ "-"}
+                  {subtitle}
                 </div>
               </div>
             </div>
@@ -88,7 +98,7 @@ export default function SpasmAlert() {
             <button onClick={() => setDismissed(true)}
               className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors"
               style={{ color: "var(--text-muted)", border: "1px solid var(--border)" }}
-              onMouseEnter={e => (e.currentTarget.style.background = "white")}
+              onMouseEnter={e => (e.currentTarget.style.background = "var(--page-bg)")}
               onMouseLeave={e => (e.currentTarget.style.background = "transparent")}>
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                 <path d="M18 6L6 18M6 6l12 12"/>
@@ -98,8 +108,8 @@ export default function SpasmAlert() {
 
           {/* Confidence */}
           <div className="rounded-lg p-3 mb-3 space-y-2.5"
-            style={{ background: "rgba(255,255,255,0.6)", border: "1px solid rgba(217,48,37,0.08)" }}>
-            <ConfidenceBar label="EEG" value={89} color="var(--blue)" bg="rgba(37,99,235,0.1)" />
+            style={{ background: "var(--card-bg)", border: "1px solid rgba(217,48,37,0.08)" }}>
+            <ConfidenceBar label="EEG" value={confidencePct} color="var(--blue)" bg="rgba(37,99,235,0.1)" />
             {/* No real video pipeline or fusion score yet — only EEG data exists right now */}
             {/* <ConfidenceBar label="Video" value={82} color="var(--teal)" bg="rgba(11,138,116,0.1)" /> */}
             {/* <ConfidenceBar label="Fused" value={94} color="var(--red)" bg="rgba(217,48,37,0.1)" /> */}
@@ -124,8 +134,10 @@ export default function SpasmAlert() {
               </svg>
               {acknowledged ? "Acknowledged" : "Acknowledge"}
             </motion.button>
-            <button className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-colors"
-              style={{ background: "rgba(255,255,255,0.8)", border: "1px solid var(--border)", color: "var(--text-secondary)" }}>
+            <button onClick={() => latestEvent && onReview?.(latestEvent.startSec)}
+              disabled={!latestEvent}
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-colors"
+              style={{ background: "var(--card-bg)", border: "1px solid var(--border)", color: "var(--text-secondary)" }}>
               Review
             </button>
           </div>

@@ -45,7 +45,7 @@ export default function Sidebar({
   const { summary } = useSpasmData();
 
   // Real values from API
-  const doctorName  = summary?.patient?.clinician ?? "Dr. K. Arora";
+  const doctorName  = summary?.patient?.clinician ?? "Dr. Jitendra Kumar Sahu";
   const totalSpasms = summary?.totalSpasms ?? 0;
   const initials    = doctorName.replace("Dr. ", "").split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase();
 
@@ -85,9 +85,11 @@ export default function Sidebar({
         </div>
       </div>
 
-      {/* Ward chip */}
+      {/* Ward chip — only one ward exists in this dataset, so it's a real
+          shortcut into the patient roster rather than a fake ward switcher. */}
       <div className="px-4 py-3" style={{ borderBottom: "1px solid var(--sidebar-border)" }}>
-        <button className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left transition-all"
+        <button onClick={() => handleNav("patients")}
+          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left transition-all"
           style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.07)" }}>
           <div className="w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0"
             style={{ background: "rgba(25,103,210,0.3)" }}>
@@ -100,7 +102,7 @@ export default function Sidebar({
             <div className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>4 active patients</div>
           </div>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2.5" strokeLinecap="round">
-            <path d="M6 9l6 6 6-6"/>
+            <path d="M9 18l6-6-6-6"/>
           </svg>
         </button>
       </div>
@@ -124,7 +126,6 @@ export default function Sidebar({
                     style={{
                       background:  isActive ? "rgba(255,255,255,0.09)" : "transparent",
                       color:       isActive ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.45)",
-                      borderLeft:  isActive ? "2px solid #93C5FD" : "2px solid transparent",
                     }}
                   >
                     <NavIcon d={item.icon} polyline={item.polyline} />
@@ -144,24 +145,31 @@ export default function Sidebar({
         ))}
       </nav>
 
-      {/* Bottom */}
+      {/* Bottom — Settings routes to Alert Config, the closest real settings
+          screen this app has; Help & Docs routes to the real in-app docs page. */}
       <div className="px-3 pb-4 pt-3 space-y-0.5" style={{ borderTop: "1px solid var(--sidebar-border)" }}>
-        {[
-          { label: "Settings",   icon: "M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" },
-          { label: "Help & Docs", icon: "M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zM9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01" },
-        ].map((item) => (
-          <button key={item.label}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all"
-            style={{ color: "rgba(255,255,255,0.35)" }}
-            onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.05)")}
-            onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
-          >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round">
-              <path d={item.icon}/>
-            </svg>
-            {item.label}
-          </button>
-        ))}
+        <button onClick={() => handleNav("alerts")}
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all"
+          style={{ color: "rgba(255,255,255,0.35)" }}
+          onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.05)")}
+          onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round">
+            <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+          Settings
+        </button>
+        <button onClick={() => handleNav("docs")}
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all"
+          style={{ color: "rgba(255,255,255,0.35)" }}
+          onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.05)")}
+          onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round">
+            <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zM9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/>
+          </svg>
+          Help &amp; Docs
+        </button>
 
         {/* User — real doctor name */}
         <div className="flex items-center gap-3 px-3 pt-3 mt-1" style={{ borderTop: "1px solid var(--sidebar-border)" }}>

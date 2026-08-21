@@ -13,7 +13,7 @@ export default function PatientCard() {
 
   const fields = [
     { label: "Etiology",  value: patient?.etiology  ?? "Structural (R MCD)", priority: true },
-    { label: "Clinician", value: patient?.clinician  ?? "Dr. K. Arora",       priority: true },
+    { label: "Clinician", value: patient?.clinician  ?? "Dr. Jitendra Kumar Sahu", priority: true },
     { label: "Admitted",  value: admitDate,                                   priority: false },
     { label: "Weight",    value: patient?.weightKg ? `${patient.weightKg} kg` : "7.2 kg", priority: false },
   ];
@@ -26,9 +26,6 @@ export default function PatientCard() {
 
   return (
     <div className="card flex items-center gap-0 overflow-hidden">
-      {/* Left accent strip */}
-      <div className="w-1 self-stretch flex-shrink-0" style={{ background: "var(--red)" }} />
-
       <div className="flex flex-wrap sm:flex-nowrap items-center gap-4 px-4 py-3.5 flex-1 min-w-0">
         {/* Avatar + name */}
         <div className="flex items-center gap-3 flex-shrink-0">
@@ -70,10 +67,6 @@ export default function PatientCard() {
         {/* Status badge */}
         <div className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg flex-shrink-0"
           style={{ background: "var(--red-light)", color: "var(--red)", border: "1px solid var(--red-border)" }}>
-          <span className="relative flex h-1.5 w-1.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ background: "var(--red)" }} />
-            <span className="relative inline-flex rounded-full h-1.5 w-1.5" style={{ background: "var(--red)" }} />
-          </span>
           <span className="hidden sm:inline">Active Monitoring</span>
           <span className="sm:hidden">Live</span>
         </div>
