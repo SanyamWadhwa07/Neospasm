@@ -73,7 +73,7 @@ export default function EventsView({ onSelectEvent }: { onSelectEvent?: (sec: nu
   const patientId   = summary?.patient?.id   ?? "00482-A";
 
   return (
-    <div className="px-4 pt-6 pb-4 md:px-10 md:pt-8 md:pb-6 space-y-4 max-w-[1200px]">
+    <div className="px-4 pt-6 pb-4 md:px-10 md:pt-8 md:pb-6 space-y-4 max-w-[1200px] mx-auto w-full">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

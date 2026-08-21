@@ -21,7 +21,7 @@ export type NavId = "dashboard" | "patients" | "eeg" | "events" | "reports" | "t
 
 function DashboardView({ onSeekEeg }: { onSeekEeg: (sec: number) => void }) {
   return (
-    <div className="px-4 pt-6 pb-4 md:px-10 md:pt-8 md:pb-6 space-y-4 max-w-[1400px]">
+    <div className="px-4 pt-6 pb-4 md:px-10 md:pt-8 md:pb-6 space-y-4 max-w-[1400px] mx-auto w-full">
       <PatientCard />
 
       {/* Two independent stacks, each sized by its own content: left carries

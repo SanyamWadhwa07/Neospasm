@@ -126,7 +126,7 @@ function FormulaBarDiagram() {
 
 export default function DocsView() {
   return (
-    <div className="px-4 pt-6 pb-4 md:px-10 md:pt-8 md:pb-6 space-y-5 max-w-[900px]">
+    <div className="px-4 pt-6 pb-4 md:px-10 md:pt-8 md:pb-6 space-y-5 max-w-[900px] mx-auto w-full">
       <div>
         <h1 className="text-xl font-semibold" style={{ color: "var(--text-primary)", letterSpacing: "-0.02em" }}>
           Help &amp; Docs
